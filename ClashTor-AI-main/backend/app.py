@@ -570,25 +570,33 @@ def login():
         error_message_key = 'UNKNOWN_ERROR'
         human_readable_error = 'Giriş sırasında bilinmeyen bir hata oluştu.'
         status_code = 500
-        try:
-            error_json_str = e.args[1] 
-            error_json = json.loads(error_json_str)
-            error_message_key = error_json.get('error', {}).get('message', 'UNKNOWN_ERROR')
-            print(f"Firebase Hata Kodu (JSON'dan): {error_message_key}")
-            
-            if "INVALID_LOGIN_CREDENTIALS" in error_message_key or \
-               "INVALID_PASSWORD" in error_message_key or \
-               "EMAIL_NOT_FOUND" in error_message_key or \
-               "INVALID_EMAIL" in error_message_key: 
-                 human_readable_error = 'Geçersiz e-posta veya şifre.'
-                 status_code = 401
-            else:
-                 human_readable_error = 'Giriş yapılamadı. Hesapla ilgili bir sorun olabilir veya servis geçici olarak kullanılamıyor.'
-                 status_code = 400
-        except Exception as parse_error:
-             print(f"Firebase hata mesajı parse edilemedi: {parse_error}")
+        if hasattr(e, 'response') and e.response is not None:
+            try:
+                # 1. Hata verisini JSON olarak yükle
+                error_data = e.response.json()
+                error_message_key = error_data.get('error', {}).get('message', 'UNKNOWN_ERROR')
+                
+                # 2. Hata anahtarına göre kullanıcı dostu mesaj oluştur
+                if "INVALID_LOGIN_CREDENTIALS" in error_message_key or \
+                   "INVALID_PASSWORD" in error_message_key or \
+                   "EMAIL_NOT_FOUND" in error_message_key or \
+                   "INVALID_EMAIL" in error_message_key: 
+                    human_readable_error = 'Geçersiz e-posta veya şifre.'
+                    status_code = 401
+                else:
+                    # Diğer Firebase hataları için (örn: TOO_MANY_REQUESTS)
+                    human_readable_error = f"Firebase servisinde bir hata oluştu: {error_message_key}"
+                    status_code = 400
+                
+                return jsonify({'error': human_readable_error}), status_code
 
-        return jsonify({'error': human_readable_error}), status_code
+            except Exception as parse_error:
+                # Yanıtı JSON olarak ayrıştırma hatası
+                return jsonify({'error': 'Sunucudan gelen yanıt işlenemedi. '}), 500
+        
+        else:
+            # Ağ zaman aşımı veya bilinmeyen bir hata
+            return jsonify({'error': 'Giriş sırasında bilinmeyen bir ağ hatası oluştu.'}), 500
             
 
 # MEVCUT /google-login fonksiyonunu bununla DEĞİŞTİRİN
