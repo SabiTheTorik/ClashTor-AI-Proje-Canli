@@ -522,7 +522,7 @@ def login():
     
     print(f"Firebase Auth için denenecek e-posta: {email_to_use}")
 
-   try:
+    try:
         # Pyrebase'i kaldırıp Firebase REST API ile şifre doğrulama yapın
         url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={firebase_config['apiKey']}"
         payload = {
