@@ -677,7 +677,9 @@ def google_login():
 @app.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('home'))
+    # Yönlendirmeyi Flask'in Catch-All rotasına (serve) yönlendirin
+    # url_for('serve') kullanmak, sizi ana sayfaya güvenli bir şekilde yönlendirecektir.
+    return redirect(url_for('serve'))
 
 # YENİ: Kullanıcıyı premium olmaya yönlendiren sayfa
 @app.route('/premium')
