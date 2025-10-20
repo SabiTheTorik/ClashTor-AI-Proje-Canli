@@ -40,7 +40,10 @@ app = Flask(
 
 app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 
-CORS(app, supports_credentials=True, origins=['http://localhost:3000'])
+RENDER_DOMAIN = "https://clashtor-ai.onrender.com"
+ALLOWED_ORIGINS = ['http://localhost:3000', RENDER_DOMAIN]
+
+CORS(app, supports_credentials=True, origins=ALLOWED_ORIGINS)
 
 BASE_DIR = Path(__file__).resolve().parent
 
