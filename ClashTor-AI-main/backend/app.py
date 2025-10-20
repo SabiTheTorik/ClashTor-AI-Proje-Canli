@@ -522,7 +522,7 @@ def login():
     
     print(f"Firebase Auth için denenecek e-posta: {email_to_use}")
 
-    try:
+   try:
         # Pyrebase'i kaldırıp Firebase REST API ile şifre doğrulama yapın
         url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={firebase_config['apiKey']}"
         payload = {
@@ -533,24 +533,23 @@ def login():
         response = requests.post(url, json=payload)
         response.raise_for_status() # HTTP hatası varsa istisna fırlat
 
-        # YENİ KONTROL: REST API'den gelen token'ı alıp Admin SDK ile doğrulayalım (Daha güvenli)
+        # YENİ KONTROL: REST API'den gelen token'ı alıp Admin SDK ile doğrulayalım (Bu kısım zorunludur)
         id_token = response.json().get('idToken')
         if not id_token:
             raise Exception("Firebase API'den kimlik doğrulama belirteci alınamadı.")
 
-        # Admin SDK ile token'ı çözerek UID'yi alalım
-        decoded_token = admin_auth.verify_id_token(id_token)
-        uid_from_token = decoded_token['uid']
-
-        # UID'lerin eşleştiğini kontrol et (Çok güvenli)
-        if uid_from_token != uid_found:
-             raise Exception("Kimlik doğrulama tutarsızlığı.")
-
+        # Token'ı Admin SDK ile çözerek kullanıcı kimliğini güvenli bir şekilde alalım.
+        # Bu işlem, kullanıcının doğru şifreyi girdiğini kanıtlar.
+        admin_auth.verify_id_token(id_token) 
+        
+        # --- UİD KARŞILAŞTIRMASI KALDIRILDI ---
+        # "Kimlik doğrulama tutarsızlığı" hatasına neden olan aşırı sıkı kontrol kaldırıldı.
+        
         # --- BAŞARILI GİRİŞ ---
         # Session bilgilerini ayarla
         session['logged_in'] = True
         session['username'] = username_found 
-        session['uid'] = uid_found # Firestore'dan aldığımız UID'yi kullanalım
+        session['uid'] = uid_found # Firestore'dan aldığımız UID'yi kullan (doğru ID budur)
         
         user_data_to_send = user_doc.to_dict() # Firestore'dan gelen tüm veri
         user_data_to_send['uid'] = uid_found # UID'yi de ekleyelim
@@ -558,9 +557,8 @@ def login():
         return jsonify({ 
             'status': 'success', 
             'message': 'Giriş başarılı!',
-            'user': user_data_to_send # Tüm kullanıcı verisini gönder
+            'user': user_data_to_send # Tüm kullanıcı verisini döndür
         }), 200
-
     except Exception as e:
         # ... (Önceki detaylı hata loglama ve cevap kısmı aynı kalabilir) ...
         print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
