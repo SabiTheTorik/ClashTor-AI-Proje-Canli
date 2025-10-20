@@ -485,8 +485,9 @@ def register():
 # MEVCUT login fonksiyonunu TEKRAR bununla değiştirin
 @app.route('/login', methods=['POST'])
 def login():
-    login_identifier = request.form.get('login_identifier')
-    password = request.form.get('password')
+    data = request.get_json() or {}
+    login_identifier = data.get('login_identifier') or data.get('email') or data.get('username')
+    password = data.get('password')
 
     if not login_identifier or not password:
         return jsonify({'error': 'Kullanıcı adı/e-posta ve şifre gereklidir.'}), 400
