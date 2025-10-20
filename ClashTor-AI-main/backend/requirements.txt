@@ -7,4 +7,4 @@ firebase-admin==6.5.0       # Firestore ve Admin SDK için
 requests==2.31.0            # Supercell API için
 markdown==3.6               # AI analiz çıktısını HTML'e çevirmek için
 pytz==2024.1                # Zaman dilimi işlemleri için
-google-genai==0.16.0        # Gemini API için (genai)
+google-genai==1.45.0        # Gemini API için (genai)
