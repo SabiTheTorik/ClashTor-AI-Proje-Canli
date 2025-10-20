@@ -33,8 +33,11 @@ REACT_BUILD_DIR = os.path.join(
 app = Flask(
     __name__,
     static_folder=REACT_BUILD_DIR,
-    template_folder=REACT_BUILD_DIR  # HTML dosyalarının da buradan okunmasını sağlar
+    template_folder=REACT_BUILD_DIR,
+    # YENİ: Statik dosyalar için benzersiz bir URL öneki belirliyoruz
+    static_url_path='/yuzeyel-static' 
 )
+
 app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 
 CORS(app, supports_credentials=True, origins=['http://localhost:3000'])
