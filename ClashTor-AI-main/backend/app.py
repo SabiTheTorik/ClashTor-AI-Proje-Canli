@@ -444,12 +444,14 @@ def register():
                  return jsonify({'error': 'Kullanıcı oluşturuldu ancak veritabanına kaydedilemedi.'}), 500
 
             # --- BAŞARILI KAYIT ---
-            # flash ve redirect yerine JSON cevabı döndür
+            custom_token = admin_auth.create_custom_token(uid)
+            
+            # React'e başarılı cevabı ve token'ı gönder (Frontend'in otomatik oturum açması için)
             return jsonify({
                 'status': 'success', 
-                'message': 'Başarıyla kayıt oldunuz! Lütfen giriş yapın.' 
-                # Not: Genellikle kayıt sonrası otomatik giriş yapılmaz, kullanıcı login sayfasına yönlendirilir.
-            }), 201 # 201 Created status kodu
+                'message': 'Başarıyla kayıt oldunuz!',
+                'custom_token': custom_token.decode('utf-8') # Token'ı döndür
+            }), 201
 
         except Exception as e:
             # Firebase Authentication hatalarını yakala
@@ -530,6 +532,19 @@ def login():
         }
         response = requests.post(url, json=payload)
         response.raise_for_status() # HTTP hatası varsa istisna fırlat
+
+        # YENİ KONTROL: REST API'den gelen token'ı alıp Admin SDK ile doğrulayalım (Daha güvenli)
+        id_token = response.json().get('idToken')
+        if not id_token:
+            raise Exception("Firebase API'den kimlik doğrulama belirteci alınamadı.")
+
+        # Admin SDK ile token'ı çözerek UID'yi alalım
+        decoded_token = admin_auth.verify_id_token(id_token)
+        uid_from_token = decoded_token['uid']
+
+        # UID'lerin eşleştiğini kontrol et (Çok güvenli)
+        if uid_from_token != uid_found:
+             raise Exception("Kimlik doğrulama tutarsızlığı.")
 
         # --- BAŞARILI GİRİŞ ---
         # Session bilgilerini ayarla
