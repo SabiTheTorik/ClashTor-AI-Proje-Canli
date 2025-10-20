@@ -22,6 +22,9 @@ from pathlib import Path
 load_dotenv()
 # =================================================================
 
+# db'yi başlangıçta None olarak ayarla (NameError'ı önlemek için)
+db = None
+
 # --- Kurulum ---
 REACT_BUILD_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
@@ -62,7 +65,7 @@ firebase_config = {
 
 cred_content = os.environ.get("FIREBASE_SERVICE_ACCOUNT")
 
-if cred_content and cred_content.startswith('{'): # JSON içeriği olup olmadığını kontrol et
+if cred_content and cred_content.startswith('{'): 
     try:
         # Doğrudan içeriği JSON objesi olarak oku
         cred_info = json.loads(cred_content)
@@ -71,7 +74,8 @@ if cred_content and cred_content.startswith('{'): # JSON içeriği olup olmadı�
         db = firestore.client()
     except Exception as e:
         print(f"KRİTİK HATA: JSON içerik okunamadı veya Firebase Admin başlatılamadı: {e}")
-        db = None
+        # db zaten None olarak tanımlı, burada tekrar atamaya gerek yok
+        pass
 
 # --- Diğer API Kurulumları ---
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
