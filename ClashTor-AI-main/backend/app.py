@@ -153,7 +153,7 @@ ALL_CARDS_CACHE = None
 def get_all_cards_data():
     global ALL_CARDS_CACHE
     if ALL_CARDS_CACHE: return ALL_CARDS_CACHE
-    url = "https://api.clashroyale.com/v1/cards"
+    url = "https://proxy.royaleapi.dev/v1/cards"
     headers = {"Authorization": f"Bearer {SUPERCELL_API_KEY}"}
     try:
         response = requests.get(url, headers=headers, timeout=10)
@@ -165,7 +165,7 @@ def get_all_cards_data():
         return {}
 
 def get_player_info(tag):
-    url = f"https://api.clashroyale.com/v1/players/{tag}"
+    url = f"https://proxy.royaleapi.dev/v1/players/{tag}"
     headers = {"Authorization": f"Bearer {SUPERCELL_API_KEY}"}
     try:
         response = requests.get(url, headers=headers, timeout=10)
@@ -175,7 +175,7 @@ def get_player_info(tag):
         return {"error": f"Supercell Profil Bilgisi Çekilemedi: {e}"}
 
 def supercell_veri_cek(tag):
-    url = f"https://api.clashroyale.com/v1/players/{tag}/battlelog"
+    url = f"https://proxy.royaleapi.dev/v1/players/{tag}/battlelog"
     headers = {"Authorization": f"Bearer {SUPERCELL_API_KEY}"}
     try:
         response = requests.get(url, headers=headers, timeout=10)
