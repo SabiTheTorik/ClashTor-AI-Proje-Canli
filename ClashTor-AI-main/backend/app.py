@@ -44,6 +44,8 @@ CORS(app, supports_credentials=True, origins=['http://localhost:3000'])
 
 BASE_DIR = Path(__file__).resolve().parent
 
+STATIC_FILES_REGEX = re.compile(r'\.(js|css|ico|svg|png|jpg|jpeg|gif|map|txt|json)$')
+
 # --- Firebase Kurulumu ---
 firebase_config = {
     "apiKey": os.environ.get("FIREBASE_API_KEY"),
@@ -1152,13 +1154,15 @@ def get_user_analyses(username):
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
-    # Bu fonksiyon, Flask'in statik klasöründen (yani REACT_BUILD_DIR'den) 
-    # 'index.html' dosyasını gönderir. React Router, gerisini devralır.
+    # Eğer gelen 'path' bir statik dosya uzantısıyla bitiyorsa, 
+    # Flask'in varsayılan statik sunucusuna (frontend/build klasörüne) yönlendir.
+    if STATIC_FILES_REGEX.search(path):
+        # Statik dosyaları doğrudan Flask'in static_folder'ından sunmasını istiyoruz.
+        # Burada 'index.html' değil, istenen dosyanın kendisini bulmaya çalışır.
+        return app.send_static_file(path)
     
-    # app.send_static_file, render_template'den daha uygundur.
+    # Aksi takdirde, bu bir React Router sayfasıdır, React'in ana dosyasını gönder.
     return app.send_static_file('index.html')
-
-# =================================================================
 
 # --- Uygulama Başlatma ---
 if __name__ == "__main__":
