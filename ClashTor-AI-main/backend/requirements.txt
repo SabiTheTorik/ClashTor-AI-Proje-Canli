@@ -1,4 +1,5 @@
 # Python (Flask) Backend Bağımlılıkları
+Flask-Cors
 Flask==3.0.3
 gunicorn==22.0.0
 python-dotenv==1.0.1
