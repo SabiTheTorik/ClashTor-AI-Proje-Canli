@@ -1,9 +1,17 @@
-# Backend (Python Flask) Bağımlılıkları
+# Python (Flask) Backend Bağımlılıkları
 Flask==3.0.3
-gunicorn==22.0.0             # Canlı yayın sunucusu
+gunicorn==22.0.0
 python-dotenv==1.0.1
-pyrebase==3.0.27
-firebase-admin==6.5.0       # Firestore ve Admin SDK için
-markdown==3.6               # AI analiz çıktısını HTML'e çevirmek için
-pytz==2024.1                # Zaman dilimi işlemleri için
-google-genai==0.0.1       # Gemini API için (genai)
+markdown==3.6
+pytz==2024.1
+
+# Firebase (Çakışmasız, Modern Çözüm)
+# pyrebase ARTIK YOK.
+firebase-admin==6.5.0     # Firestore, Admin Auth ve Google Login
+# requests (Google-Genai bağımlılığını kullanacak)
+
+# Gemini AI (Artık sorunsuz kurulan paket)
+google-generativeai
+
+# HTTP İstekleri
+requests>=2.28.1
