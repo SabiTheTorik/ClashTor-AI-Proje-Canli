@@ -60,22 +60,18 @@ firebase_config = {
     "databaseURL": f"https://{os.environ.get('FIREBASE_PROJECT_ID')}.firebaseio.com"
 }
 
-cred_filename = os.environ.get("FIREBASE_SERVICE_ACCOUNT")
+cred_content = os.environ.get("FIREBASE_SERVICE_ACCOUNT")
 
-# 2. Eğer dosya adı varsa, yolu BASE_DIR'e göre çöz
-if cred_filename:
-    cred_path = BASE_DIR / cred_filename # Tam yolu oluşturur
-else:
-    # Eğer ortam değişkeni bile ayarlanmadıysa
-    cred_path = None
-
-if cred_path and cred_path.exists():
-    cred = credentials.Certificate(cred_path.as_posix())
-    firebase_admin.initialize_app(cred)
-    db = firestore.client()
-else:
-    print(f"UYARI: Firebase Admin SDK başlatılamadı. '{cred_filename}' yolu ({cred_path}) bulunamadı veya 'FIREBASE_SERVICE_ACCOUNT' değişkeni ayarlanmadı.")
-    db = None
+if cred_content and cred_content.startswith('{'): # JSON içeriği olup olmadığını kontrol et
+    try:
+        # Doğrudan içeriği JSON objesi olarak oku
+        cred_info = json.loads(cred_content)
+        cred = credentials.Certificate(cred_info)
+        firebase_admin.initialize_app(cred)
+        db = firestore.client()
+    except Exception as e:
+        print(f"KRİTİK HATA: JSON içerik okunamadı veya Firebase Admin başlatılamadı: {e}")
+        db = None
 
 # --- Diğer API Kurulumları ---
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
