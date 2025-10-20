@@ -185,14 +185,15 @@ export const AuthProvider = ({ children }) => {
       if (user) {
         // Firebase'den ID token'ı al
         const idToken = await user.getIdToken(/* forceRefresh */ true);
-
-        // Token'ı backend'e gönder
+        const idTokenString = String(idToken); // Token'ı zorla string'e çevir
+        
+        // 2. Token'ı Backend'e gönder
         const response = await axios.post(`${API_BASE_URL}/google-login`,
-          new URLSearchParams({ 'id_token': idToken }), // Form data olarak gönder
-          {
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            withCredentials: true
-          }
+            new URLSearchParams({ 'id_token': idTokenString }), // <-- DÜZELTİLMİŞ SATIR
+            {
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                withCredentials: true
+            }
         );
 
         if (response.data && response.data.status === 'success' && response.data.user) {
