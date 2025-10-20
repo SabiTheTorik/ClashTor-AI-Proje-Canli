@@ -43,6 +43,11 @@ app = Flask(
 
 app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 
+app.config.update(
+    SESSION_COOKIE_SAMESITE='None',  # Farklı alanlardan gelen çerezlere izin ver
+    SESSION_COOKIE_SECURE=True       # HTTPS (Render) için zorunludur
+)
+
 RENDER_DOMAIN = "https://clashtor-ai.onrender.com"
 ALLOWED_ORIGINS = ['http://localhost:3000', RENDER_DOMAIN]
 
@@ -65,17 +70,20 @@ firebase_config = {
 
 cred_content = os.environ.get("FIREBASE_SERVICE_ACCOUNT")
 
-if cred_content and cred_content.startswith('{'): 
+if cred_content:
     try:
-        # Doğrudan içeriği JSON objesi olarak oku
+        # Deneme 1: JSON içeriğini doğrudan sözlük olarak kullan
         cred_info = json.loads(cred_content)
         cred = credentials.Certificate(cred_info)
         firebase_admin.initialize_app(cred)
         db = firestore.client()
-    except Exception as e:
-        print(f"KRİTİK HATA: JSON içerik okunamadı veya Firebase Admin başlatılamadı: {e}")
-        # db zaten None olarak tanımlı, burada tekrar atamaya gerek yok
-        pass
+    except Exception as e_json:
+        print(f"KRİTİK HATA 1: JSON Parse/Başlatma Hatası ({e_json})")
+        # Deneme 2: JSON string'i bozuksa veya dosya yolu ise hata ver, ancak db=None kalır
+        db = None
+else:
+    print("KRİTİK HATA: FIREBASE_SERVICE_ACCOUNT ortam değişkeni boş.")
+    db = None
 
 # --- Diğer API Kurulumları ---
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
