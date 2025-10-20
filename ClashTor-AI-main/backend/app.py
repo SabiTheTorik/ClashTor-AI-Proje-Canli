@@ -9,7 +9,6 @@ from flask import Flask, render_template, request, session, redirect, url_for, f
 from datetime import datetime, timezone
 import pytz
 import google.generativeai as genai
-import pyrebase
 import firebase_admin
 from firebase_admin import credentials, firestore, auth as admin_auth
 from flask_cors import CORS
@@ -52,8 +51,6 @@ firebase_config = {
     "appId": os.environ.get("FIREBASE_APP_ID"),
     "databaseURL": f"https://{os.environ.get('FIREBASE_PROJECT_ID')}.firebaseio.com"
 }
-firebase = pyrebase.initialize_app(firebase_config)
-auth = firebase.auth()
 
 cred_filename = os.environ.get("FIREBASE_SERVICE_ACCOUNT")
 
@@ -412,8 +409,8 @@ def register():
 
         # --- Firebase Authentication ile Kullanıcı Oluşturma ---
         try:
-            user_record = auth.create_user_with_email_and_password(email, password)
-            uid = user_record['localId']
+            user_record = admin_auth.create_user(email=email, password=password, display_name=username)
+            uid = user_record.uid # Admin SDK'dan UID'yi almanın doğru yolu
             
             # Firestore'a Kullanıcı Bilgilerini Kaydet
             try:
@@ -508,23 +505,22 @@ def login():
     print(f"Firebase Auth için denenecek e-posta: {email_to_use}")
 
     try:
-        # Firebase Auth ile doğrula
-        user_firebase = auth.sign_in_with_email_and_password(email_to_use, password)
-        # Auth'dan gelen UID ile Firestore'dan aldığımız UID eşleşiyor mu diye kontrol edebiliriz (isteğe bağlı)
-        # if user_firebase['localId'] != uid_found:
-        #     print("UYARI: Auth UID ve Firestore Doc ID eşleşmiyor!")
-        #     # Bu durumda bir tutarsızlık var demektir, hata verilebilir.
-        #     return jsonify({'error': 'Hesap tutarsızlığı tespit edildi.'}), 500
-            
+        # Pyrebase'i kaldırıp Firebase REST API ile şifre doğrulama yapın
+        url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={firebase_config['apiKey']}"
+        payload = {
+            "email": email_to_use,
+            "password": password,
+            "returnSecureToken": True
+        }
+        response = requests.post(url, json=payload)
+        response.raise_for_status() # HTTP hatası varsa istisna fırlat
+
         # --- BAŞARILI GİRİŞ ---
         # Session bilgilerini ayarla
         session['logged_in'] = True
         session['username'] = username_found 
         session['uid'] = uid_found # Firestore'dan aldığımız UID'yi kullanalım
         
-        print(f"Giriş BAŞARILI: Kullanıcı adı={username_found}, UID={uid_found}") 
-        
-        # === YENİ: Başarılı JSON cevabına kullanıcı verisini ekle ===
         user_data_to_send = user_doc.to_dict() # Firestore'dan gelen tüm veri
         user_data_to_send['uid'] = uid_found # UID'yi de ekleyelim
         
