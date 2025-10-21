@@ -1181,7 +1181,12 @@ def get_user_analyses(username):
 
 # Flask'in API olmayan tüm yolları yakalamasını sağlar.
 # Not: Bu rotaların, tüm API rotalarınızdan sonra tanımlandığından emin olun!
-
+@app.route('/api/ping')
+def ping_service():
+    # Bu rota sadece API'nin ayakta olup olmadığını kontrol eder.
+    # Veritabanı veya kullanıcı oturumu kontrolüne gerek yoktur.
+    # Flask uygulamasının başladığını kanıtlamak yeterlidir.
+    return jsonify({"status": "ok", "service": "Backend is awake"}), 200
 
 # --- Uygulama Başlatma ---
 if __name__ == "__main__":
