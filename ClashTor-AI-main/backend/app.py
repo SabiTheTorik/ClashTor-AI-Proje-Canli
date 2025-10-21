@@ -33,8 +33,15 @@ REACT_BUILD_DIR = os.path.join(
 )
 
 # Flask uygulamasını, statik dosyalarını React'in build klasöründen sunacak şekilde ayarla
+# Flask uygulamasını tanımlama
 app = Flask(
-    __name__
+    __name__,
+    # KRİTİK AYAR: Flask'e statik dosyaları 'static' URL'sinde (varsayılan)
+    # ve 'backend/static' klasöründe araması gerektiğini söylüyoruz.
+    # Bu, Flask'in kendi kuralına uyar.
+    static_url_path='/static',
+    static_folder='static',
+    template_folder='static'
 )
 
 app.secret_key = os.environ.get("FLASK_SECRET_KEY")
@@ -1183,17 +1190,12 @@ def get_user_analyses(username):
 # Flask'in API olmayan tüm yolları yakalamasını sağlar.
 # Not: Bu rotaların, tüm API rotalarınızdan sonra tanımlandığından emin olun!
 
-# serve fonksiyonunu da eski, temel haline getirelim (Çünkü Flask'in kendi statik sunucusu devrede değil)
+# STATIC_FILES_REGEX ve kontrolünü SİLİN.
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
-    # Eğer bu bir statik dosya (JS/CSS) ise
-    if STATIC_FILES_REGEX.search(path):
-        # Dosyayı build klasöründe ara
-        return app.send_static_file(os.path.join('build', path))
-    
-    # Aksi takdirde, ana index.html'i gönder
-    return app.send_static_file(os.path.join('build', 'index.html'))
+    # Flask'in kendi static_folder'ından index.html'i sun.
+    return app.send_static_file('index.html')
 
 # --- Uygulama Başlatma ---
 if __name__ == "__main__":
