@@ -36,9 +36,7 @@ REACT_BUILD_DIR = os.path.join(
 app = Flask(
     __name__,
     static_folder=REACT_BUILD_DIR,
-    template_folder=REACT_BUILD_DIR,
-    # YENİ: Statik dosyalar için benzersiz bir URL öneki belirliyoruz
-    static_url_path='/yuzeyel-static' 
+    template_folder=REACT_BUILD_DIR
 )
 
 app.secret_key = os.environ.get("FLASK_SECRET_KEY")
@@ -1187,17 +1185,12 @@ def get_user_analyses(username):
 # Flask'in API olmayan tüm yolları yakalamasını sağlar.
 # Not: Bu rotaların, tüm API rotalarınızdan sonra tanımlandığından emin olun!
 
+# serve fonksiyonunu da eski, temel haline getirelim (Çünkü Flask'in kendi statik sunucusu devrede değil)
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve(path):
-    # Eğer gelen 'path' bir statik dosya uzantısıyla bitiyorsa, 
-    # Flask'in varsayılan statik sunucusuna (frontend/build klasörüne) yönlendir.
-    if STATIC_FILES_REGEX.search(path):
-        # Statik dosyaları doğrudan Flask'in static_folder'ından sunmasını istiyoruz.
-        # Burada 'index.html' değil, istenen dosyanın kendisini bulmaya çalışır.
-        return app.send_static_file(path)
-    
-    # Aksi takdirde, bu bir React Router sayfasıdır, React'in ana dosyasını gönder.
+    # Statik dosya kontrolünü SİLİN.
+    # Her şeyi index.html'e yönlendirin.
     return app.send_static_file('index.html')
 
 # --- Uygulama Başlatma ---
