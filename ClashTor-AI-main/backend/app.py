@@ -1182,31 +1182,6 @@ def get_user_analyses(username):
 # Flask'in API olmayan tüm yolları yakalamasını sağlar.
 # Not: Bu rotaların, tüm API rotalarınızdan sonra tanımlandığından emin olun!
 
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
-def serve(path):
-    # API dışındaki tüm yollar için (register, profile, analyzer, vs.)
-    # koşulsuz olarak React'in ana dosyasını (index.html) sun.
-    # Flask, bu dosyayı bulmak için 'build' klasörüne bakacaktır.
-    
-    # Not: Eğer Flask uygulamasını sadece API sunucusu olarak ayarladıysanız (en son çözüm),
-    # bu dosyanın tam yolunu belirtmeniz gerekebilir.
-
-    # Flask, dosyanın nerede olduğunu bilmeli (En güvenli yol: tam yol)
-    INDEX_FILE_PATH = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
-        'frontend', 
-        'build', 
-        'index.html'
-    )
-    
-    # Flask'in statik dosya sunma fonksiyonu yerine, dosyayı kendimiz okuyup döndürelim
-    # (En güvenli yol budur çünkü Flask'in yol karmaşasını atlarız)
-    try:
-        with open(INDEX_FILE_PATH, 'r') as f:
-            return f.read(), 200, {'Content-Type': 'text/html'}
-    except FileNotFoundError:
-        return "Frontend Build dosyası bulunamadı.", 500
 
 # --- Uygulama Başlatma ---
 if __name__ == "__main__":
