@@ -112,9 +112,12 @@ export const Home = () => {
             <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
               Yapay zeka destekli analizi ile kazanma oranını artıran binlerce oyuncuya katılın. {/* Türkçe Çeviri */}
             </p>
-            <Link to={user ? '/analyzer' : '/register'}>
-              <Button size="lg" className="group bg-white text-blue-600 hover:bg-gray-100 px-8 py-6 text-lg shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"> {/* Transform eklendi */}
-                {user ? 'Hemen Analiz Et' : 'Ücretsiz Denemeyi Başlat'} {/* Türkçe Çeviri & Dinamik Metin */}
+            <Link to={user ? '/analyzer' : '/register'} className="w-full sm:w-auto"> {/* Link'e de w-full ekle */}
+              <Button
+                size="lg"
+                className="w-full sm:w-auto group bg-white text-blue-600 hover:bg-gray-100 px-8 py-6 text-lg shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+              >
+                {user ? 'Hemen Analiz Et' : 'Ücretsiz Denemeyi Başlat'}
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
