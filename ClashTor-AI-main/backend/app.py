@@ -34,15 +34,7 @@ REACT_BUILD_DIR = os.path.join(
 
 # Flask uygulamasını, statik dosyalarını React'in build klasöründen sunacak şekilde ayarla
 # Flask uygulamasını tanımlama
-app = Flask(
-    __name__,
-    # KRİTİK AYAR: Flask'e statik dosyaları 'static' URL'sinde (varsayılan)
-    # ve 'backend/static' klasöründe araması gerektiğini söylüyoruz.
-    # Bu, Flask'in kendi kuralına uyar.
-    static_url_path='/static',
-    static_folder='static',
-    template_folder='static'
-)
+app = Flask(__name__)
 
 app.secret_key = os.environ.get("FLASK_SECRET_KEY")
 
