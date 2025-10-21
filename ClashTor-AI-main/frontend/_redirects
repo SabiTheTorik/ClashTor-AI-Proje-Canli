@@ -1,9 +1,4 @@
 /api/* https://clashtor-ai.onrender.com/api/:splat  200
 
-# KRİTİK DÜZELTME: API dışındaki tüm 404 hatalarını index.html'e yönlendir
-/register /index.html 200
-/profile/* /index.html 200
-/analyzer /index.html 200
-
 # Alternatif (Daha genel ve güvenli):
 /* /index.html 200
