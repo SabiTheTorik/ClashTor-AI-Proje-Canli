@@ -48,8 +48,10 @@ app.config.update(
     SESSION_COOKIE_SECURE=True       # HTTPS (Render) için zorunludur
 )
 
-RENDER_DOMAIN = "https://clashtor-ai.onrender.com"
-ALLOWED_ORIGINS = ['http://localhost:3000', RENDER_DOMAIN]
+# app.py
+ALLOWED_ORIGINS = ['http://localhost:3000', 
+                   'https://clashtor-ai.onrender.com', # Kendi backendiniz
+                   'https://clashtor-ai.netlify.app'] # Netlify frontend
 
 CORS(app, supports_credentials=True, origins=ALLOWED_ORIGINS)
 
