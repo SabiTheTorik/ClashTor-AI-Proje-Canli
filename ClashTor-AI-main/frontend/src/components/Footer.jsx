@@ -1,17 +1,17 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 // Navbar'daki SVG ikonunu import ediyoruz
-import NavbarSvgIcon from '../assets/navbar-icon.svg'; 
+import NavbarSvgIcon from '../assets/navbar-icon.svg';
 
 export const Footer = () => {
   return (
     <footer className="w-full border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        
+
         {/* Üst Kısım: Her şeyi ortalamak için flex-col kullanıyoruz */}
         <div className="flex flex-col items-center gap-6">
-          
+
           {/* 1. Logo ve Başlık (Ortalanmış) */}
           <Link to="/" className="flex items-center space-x-2 group">
             <div className="relative">
@@ -31,6 +31,9 @@ export const Footer = () => {
             <Link to="/report-bug" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">
               Hata Bildir
             </Link>
+            {/* YENİ LİNKLERİ BURAYA EKLEYİN (Adsense için ZORUNLU) */}
+            <Link to="/about" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">Hakkımızda</Link>
+            <Link to="/privacy" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">Gizlilik Politikası</Link>
           </div>
         </div>
 

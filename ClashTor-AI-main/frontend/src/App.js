@@ -16,6 +16,8 @@ import { Footer } from './components/Footer';
 // --- YENİ İMPORTLAR ---
 import { Contact } from './pages/Contact';
 import { ReportBug } from './pages/ReportBug';
+import { About } from "./pages/About";
+import { Privacy } from './pages/Privacy';
 // --- YENİ İMPORTLAR SONU ---
 
 function App() {
@@ -39,6 +41,8 @@ function App() {
                 {/* --- YENİ ROTALAR --- */}
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/report-bug" element={<ReportBug />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/privacy" element={<Privacy />} />
                 {/* --- YENİ ROTALAR SONU --- */}
               </Routes>
             </main>
