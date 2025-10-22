@@ -30,18 +30,18 @@ const swapInfo = getSwapInfo(MOCK_AI_OUTPUT);
 
 
 export const ExampleAnalysis = () => {
-    
+
     // Gerçek AI çıktısı burada HTML olarak gösterilir
     const analysisHtml = MOCK_AI_OUTPUT.replace(/\n/g, '<br/>');
 
     return (
         <div className="min-h-screen pt-20 pb-12 bg-gradient-to-br from-gray-50 via-blue-50 to-cyan-50 dark:from-gray-900 dark:via-blue-950 dark:to-gray-900">
             <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                
+
                 <div className="text-center mb-10 space-y-4">
                     <div className="inline-flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white">
-                         <Sparkles className="h-6 w-6 text-purple-500" />
-                         Giriş Yapmadan Önce AI Analiz Örneği
+                        <Sparkles className="h-6 w-6 text-purple-500" />
+                        Giriş Yapmadan Önce AI Analiz Örneği
                     </div>
                     <p className="text-gray-600 dark:text-gray-400">
                         Uygulamamızın tam gücünü görmek ister misiniz? İşte bir oyuncunun destesi için yapay zekamızın ürettiği örnek sonuç.
@@ -85,7 +85,7 @@ export const ExampleAnalysis = () => {
                 {/* --- CTA - Giriş Yap Butonu --- */}
                 <div className="text-center mt-10">
                     <Link to="/register">
-                         <Button size="lg" className="group bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-8 py-4 text-lg shadow-xl hover:shadow-2xl transition-all">
+                        <Button size="lg" className="group bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-8 py-4 text-lg shadow-xl hover:shadow-2xl transition-all">
                             Hemen Kayıt Ol ve Analizini Başlat
                             <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                         </Button>
