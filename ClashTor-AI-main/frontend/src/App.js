@@ -18,6 +18,7 @@ import { Contact } from './pages/Contact';
 import { ReportBug } from './pages/ReportBug';
 import { About } from "./pages/About";
 import { Privacy } from './pages/Privacy';
+import { ExampleAnalysis } from './pages/ExampleAnalysis';
 // --- YENİ İMPORTLAR SONU ---
 
 function App() {
@@ -37,6 +38,7 @@ function App() {
                 <Route path="/profile/:username" element={<Profile />} />
                 <Route path="/decks" element={<Decks />} />
                 <Route path="/premium" element={<Premium />} />
+                <Route path="/example-analysis" element={<ExampleAnalysis />} />
                 
                 {/* --- YENİ ROTALAR --- */}
                 <Route path="/contact" element={<Contact />} />

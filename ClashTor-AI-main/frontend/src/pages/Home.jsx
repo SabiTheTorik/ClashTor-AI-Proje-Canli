@@ -121,6 +121,16 @@ export const Home = () => {
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
+            {/* 2. ÖRNEK ANALİZ LİNKİ (AdSense İçin ZORUNLU EKLENTİ) */}
+            <Link to="/example-analysis">
+              <Button
+                size="lg"
+                variant="link" // Link stili kullanarak butona benzemesini engelle
+                className="text-white hover:text-gray-200 dark:text-white dark:hover:text-gray-200"
+              >
+                Örnek Analizi Gör
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
