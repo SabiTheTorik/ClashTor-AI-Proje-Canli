@@ -81,11 +81,16 @@ export const ExampleAnalysis = () => {
                         />
                     </CardContent>
                 </Card>
+        
 
                 {/* --- CTA - Giriş Yap Butonu --- */}
                 <div className="text-center mt-10">
-                    <Link to="/register">
-                        <Button size="lg" className="group bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-8 py-4 text-lg shadow-xl hover:shadow-2xl transition-all">
+                    {/* KRİTİK: Link'e w-full sm:w-auto ekle */}
+                    <Link to="/register" className="w-full sm:w-auto inline-block">
+                        <Button
+                            size="lg"
+                            className="w-full sm:w-auto group bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-8 py-4 text-lg shadow-xl hover:shadow-2xl transition-all"
+                        >
                             Hemen Kayıt Ol ve Analizini Başlat
                             <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                         </Button>
