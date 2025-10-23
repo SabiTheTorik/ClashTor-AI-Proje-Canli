@@ -212,14 +212,14 @@ export const Profile = () => {
     // setIsDeleteDialogOpen(false); // Dialog zaten kendi kapanacak
 
     try {
-        // Backend API'sini çağır
-        await axios.post(`${API_BASE_URL}/delete-analysis/${idToDelete}`, {}, { withCredentials: true });
-        // Frontend state'inden sil
-        setAnalyses(prev => prev.filter(a => a.id !== idToDelete));
-        toast({ title: "Analiz Silindi" });
+      // Backend API'sini çağır
+      await axios.post(`${API_BASE_URL}/delete-analysis/${idToDelete}`, {}, { withCredentials: true });
+      // Frontend state'inden sil
+      setAnalyses(prev => prev.filter(a => a.id !== idToDelete));
+      toast({ title: "Analiz Silindi" });
     } catch (error) {
-        console.error("Delete Analysis Error:", error);
-        toast({ title: "Silme Başarısız", description: "Analiz silinirken bir hata oluştu.", variant: "destructive" });
+      console.error("Delete Analysis Error:", error);
+      toast({ title: "Silme Başarısız", description: "Analiz silinirken bir hata oluştu.", variant: "destructive" });
     }
   };
 
@@ -399,14 +399,20 @@ export const Profile = () => {
                     {/* Deste */}
                     <div className="grid grid-cols-4 gap-2">
                       {analysis.original_deck?.map((card, idx) => {
-                        const imageUrl = card?.iconUrls?.medium;
+                        // === YENİ BASİT MANTIK ===
+                        const isEvolved = card?.evolutionLevel > 0;
+                        const imageUrl = (isEvolved && card.iconUrls?.evolutionMedium)
+                          ? card.iconUrls.evolutionMedium
+                          : card.iconUrls?.medium;
                         const currentCardName = card?.name;
+                        // === MANTIK SONU ===
+
                         return imageUrl ? ( // Resim URL'si varsa
                           <div key={idx} className="relative aspect-[3/4]">
                             <img
-                              src={imageUrl}
-                              alt={currentCardName || 'Kart'} // 'card.name' kullan
-                              className="w-full h-full object-contain rounded border border-gray-300 dark:border-gray-700"
+                              src={imageUrl} // <-- Doğru resim URL'i burada
+                              alt={currentCardName || 'Kart'}
+                              className="w-full h-full object-contain rounded border border-gray-300 dark:border-gray-700" // <-- Çerçeve/border artık normal
                             />
                             {analysis.card_to_remove === currentCardName && (
                               <div className="absolute inset-0 bg-red-500/70 flex items-center justify-center rounded">
@@ -416,10 +422,9 @@ export const Profile = () => {
                           </div>
                         ) : ( // Resim URL'si yoksa placeholder
                           <div key={idx} className="aspect-[3/4] bg-gray-200 dark:bg-gray-700 rounded text-xs flex items-center justify-center text-center text-gray-500 p-1">
-                            {currentCardName || '?'} {/* 'card.name' kullan */}
+                            {currentCardName || '?'}
                           </div>
                         );
-                        // --- DÜZELTME SONU ---
                       })}
                     </div>
                     {/* Değişim */}

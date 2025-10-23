@@ -367,9 +367,17 @@ export const Analyzer = () => {
                     <div className="text-center">
                       <p className="font-semibold mb-2">{analysisData.last_battle_details.player_team.name}</p>
                       <div className="grid grid-cols-4 gap-1 w-64 mx-auto">
-                        {analysisData.last_battle_details.player_team.cards.map((card, idx) => (
-                          <img key={idx} src={card.iconUrls.medium} alt={card.name} className="w-full rounded border border-gray-300 dark:border-gray-700" />
-                        ))}
+                        {analysisData.last_battle_details.player_team.cards.map((card, idx) => {
+                          // === YENİ BASİT MANTIK ===
+                          const isEvolved = card?.evolutionLevel > 0;
+                          const imageUrl = (isEvolved && card.iconUrls?.evolutionMedium)
+                            ? card.iconUrls.evolutionMedium
+                            : card.iconUrls?.medium;
+                          // === MANTIK SONU ===
+                          return (
+                            <img key={idx} src={imageUrl} alt={card.name} className="w-full rounded border border-gray-300 dark:border-gray-700" />
+                          );
+                        })}
                       </div>
                     </div>
                     <Separator orientation="vertical" className="h-20 hidden md:block" />
@@ -377,9 +385,21 @@ export const Analyzer = () => {
                     <div className="text-center">
                       <p className="font-semibold mb-2">{analysisData.last_battle_details.opponent_team.name}</p>
                       <div className="grid grid-cols-4 gap-1 w-64 mx-auto">
-                        {analysisData.last_battle_details.opponent_team.cards.map((card, idx) => (
-                          <img key={idx} src={card.iconUrls.medium} alt={card.name} className="w-full rounded border border-gray-300 dark:border-gray-700" />
-                        ))}
+
+                        {/* === DEĞİŞİKLİK BURADA BAŞLIYOR === */}
+                        {analysisData.last_battle_details.opponent_team.cards.map((card, idx) => {
+                          // === YENİ BASİT MANTIK (Rakip için) ===
+                          const isEvolved = card?.evolutionLevel > 0;
+                          const imageUrl = (isEvolved && card.iconUrls?.evolutionMedium)
+                            ? card.iconUrls.evolutionMedium
+                            : card.iconUrls?.medium;
+                          // === MANTIK SONU ===
+                          return (
+                            <img key={idx} src={imageUrl} alt={card.name} className="w-full rounded border border-gray-300 dark:border-gray-700" />
+                          );
+                        })}
+                        {/* === DEĞİŞİKLİK BURADA BİTİYOR === */}
+
                       </div>
                     </div>
                   </div>
@@ -401,10 +421,24 @@ export const Analyzer = () => {
                     {/* Çıkarılacak Kart */}
                     <div className="text-center flex flex-col items-center">
                       <div className="w-24 h-auto sm:w-32 rounded-xl overflow-hidden border-4 border-red-500 shadow-lg mb-2">
-                        {analysisData.deck_cards.find(c => c.name === analysisData.card_swap_info.remove) ?
-                          <img src={analysisData.deck_cards.find(c => c.name === analysisData.card_swap_info.remove).iconUrls.medium} alt={analysisData.card_swap_info.remove} className="w-full h-full object-contain" />
-                          : <div className="w-full h-full bg-gray-200 flex items-center justify-center text-xs">Kart Resmi Yok</div>
-                        }
+                        {(() => {
+                          // 1. Çıkarılacak kartın tam objesini bul
+                          const cardToRemove = analysisData.deck_cards.find(c => c.name === analysisData.card_swap_info.remove);
+
+                          if (!cardToRemove) {
+                            return <div className="w-full h-full bg-gray-200 flex items-center justify-center text-xs">Kart Resmi Yok</div>;
+                          }
+
+                          // 2. === YENİ BASİT MANTIK ===
+                          const isEvolved = cardToRemove?.evolutionLevel > 0;
+                          const imageUrl = (isEvolved && cardToRemove.iconUrls?.evolutionMedium)
+                            ? cardToRemove.iconUrls.evolutionMedium
+                            : cardToRemove.iconUrls?.medium;
+                          // === MANTIK SONU ===
+
+                          // 3. Resmi render et
+                          return <img src={imageUrl} alt={analysisData.card_swap_info.remove} className="w-full h-full object-contain" />;
+                        })()}
                       </div>
                       <div className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">{analysisData.card_swap_info.remove}</div>
                       <Badge variant="destructive" className="mt-1 text-xs">Çıkar</Badge>

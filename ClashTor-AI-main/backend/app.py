@@ -774,16 +774,42 @@ def get_user_shared_analyses(username):
             analysis_data = analysis.to_dict()
             analysis_data['id'] = analysis.id 
             
-            # Kart isimlerini kart objelerine çevir
+            # === YENİ GÜNCELLENMİŞ BLOK (EVRİM BİLGİSİNİ KORUR) ===
             original_deck_objects = []
             if 'original_deck' in analysis_data and isinstance(analysis_data['original_deck'], list):
-                for item in analysis_data['original_deck']:
-                    card_name_to_check = item if isinstance(item, str) else item.get('name') if isinstance(item, dict) else None
+                for saved_card in analysis_data['original_deck']:
+                    
+                    card_name_to_check = None
+                    evolution_level = None # <-- YENİ
+                    
+                    if isinstance(saved_card, dict):
+                        # YENİ VERİ FORMATI (Obje olarak kaydedilmiş)
+                        card_name_to_check = saved_card.get('name')
+                        evolution_level = saved_card.get('evolutionLevel') # Evrim bilgisini al
+                    elif isinstance(saved_card, str):
+                        # ESKİ VERİ FORMATI (String olarak kaydedilmiş)
+                        card_name_to_check = saved_card
+                    
+                    # Kartı all_cards_data'da bul
                     if card_name_to_check and card_name_to_check in all_cards_data:
-                        original_deck_objects.append(all_cards_data[card_name_to_check])
+                        # Temel kart verisini KOPYALA
+                        base_card_data = all_cards_data[card_name_to_check].copy()
+                        
+                        # YENİ: Kayıttan gelen evrim bilgisini temel veriye ekle/üzerine yaz
+                        if evolution_level:
+                            base_card_data['evolutionLevel'] = evolution_level
+                            
+                        original_deck_objects.append(base_card_data)
+                        
                     elif card_name_to_check:
-                         original_deck_objects.append({"name": card_name_to_check, "iconUrls": {"medium": None}})
+                        # Kart all_cards_data'da yoksa (eski/yeni kart)
+                        placeholder = {"name": card_name_to_check, "iconUrls": {"medium": None}}
+                        if evolution_level:
+                            placeholder['evolutionLevel'] = evolution_level
+                        original_deck_objects.append(placeholder)
+                        
             analysis_data['original_deck'] = original_deck_objects
+            # === GÜNCELLEME SONU ===
 
             # Timestamp'i ISO string'e çevir
             if 'timestamp' in analysis_data and isinstance(analysis_data['timestamp'], datetime):

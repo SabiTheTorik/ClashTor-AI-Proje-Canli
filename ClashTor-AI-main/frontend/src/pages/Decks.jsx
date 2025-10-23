@@ -98,11 +98,11 @@ export const Decks = () => {
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2 group">
                       <Link
-                            to={`/profile/${analysis.user_info?.username}`}
-                            // hover:opacity-80 yerine renk değişimi ve geçiş eklendi
-                            className="hover:opacity-80 transition-opacity rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900" 
-                            aria-label={`${analysis.user_info?.username} profiline git`}
-                        >
+                        to={`/profile/${analysis.user_info?.username}`}
+                        // hover:opacity-80 yerine renk değişimi ve geçiş eklendi
+                        className="hover:opacity-80 transition-opacity rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+                        aria-label={`${analysis.user_info?.username} profiline git`}
+                      >
                         <Avatar className="h-8 w-8 ring-1 ring-blue-500/30 group-hover:ring-blue-500/50 transition-all"> {/* group-hover eklendi */}
                           <AvatarImage src={analysis.user_info?.profile_picture_url} alt={analysis.user_info?.username} />
                           <AvatarFallback className="text-xs avatar-fallback-gradient">
@@ -114,10 +114,10 @@ export const Decks = () => {
                       <div>
                         {/* === YENİ: Link eklendi (Username) === */}
                         <Link
-                               to={`/profile/${analysis.user_info?.username}`}
-                               // hover:underline kaldırıldı, renk değişimi ve geçiş eklendi
-                               className="text-sm font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 focus:outline-none focus:ring-1 focus:ring-blue-500 rounded"
-                           >
+                          to={`/profile/${analysis.user_info?.username}`}
+                          // hover:underline kaldırıldı, renk değişimi ve geçiş eklendi
+                          className="text-sm font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 focus:outline-none focus:ring-1 focus:ring-blue-500 rounded"
+                        >
                           {analysis.user_info?.username || 'Bilinmiyor'}
                         </Link>
                         {/* === === */}
@@ -140,22 +140,34 @@ export const Decks = () => {
                 <CardContent className="space-y-4 flex-grow flex flex-col">
                   {/* Deste */}
                   <div className="grid grid-cols-4 gap-2">
-                    {analysis.original_deck && analysis.original_deck.slice(0, 8).map((card, idx) => { // 'card' ARTIK BİR NESNE
-                      // Kart nesnesi geçerli mi ve resmi var mı diye kontrol et
-                      return card && card.iconUrls?.medium ? (
-                        // Eğer resim varsa, IMG etiketini render et (BURASI DOĞRU GÖRÜNÜYOR)
+                    {analysis.original_deck && analysis.original_deck.slice(0, 8).map((card, idx) => {
+                      // === YENİ BASİT MANTIK ===
+                      const isEvolved = card?.evolutionLevel > 0;
+                      // Evrimleşmişse 'evolutionMedium' URL'ini, değilse 'medium' URL'ini al
+                      const imageUrl = (isEvolved && card.iconUrls?.evolutionMedium)
+                        ? card.iconUrls.evolutionMedium
+                        : card.iconUrls?.medium;
+                      const currentCardName = card?.name;
+                      // === MANTIK SONU ===
+
+                      return imageUrl ? (
+                        // Eğer resim varsa, IMG etiketini render et
                         <div key={idx} className="relative aspect-[3/4]">
-                          <img src={card.iconUrls.medium} alt={card.name} className="w-full h-full object-contain rounded border border-gray-300 dark:border-gray-700" />
-                          {analysis.card_to_remove === card.name && (
+                          <img
+                            src={imageUrl} // <-- Doğru resim URL'i burada
+                            alt={currentCardName || 'Kart'}
+                            className="w-full h-full object-contain rounded border border-gray-300 dark:border-gray-700" // <-- Çerçeve/border artık normal
+                          />
+                          {analysis.card_to_remove === currentCardName && (
                             <div className="absolute inset-0 bg-red-500/70 flex items-center justify-center rounded">
                               <i className="fa-solid fa-minus text-white text-xl"></i>
                             </div>
                           )}
                         </div>
                       ) : (
-                        // Eğer resim YOKSA, yer tutucuyu render et (BURASI DA DOĞRU GÖRÜNÜYOR)
+                        // Eğer resim YOKSA, yer tutucuyu render et
                         <div key={idx} className="aspect-[3/4] bg-gray-200 dark:bg-gray-700 rounded text-xs flex items-center justify-center text-center text-gray-500 p-1">
-                          {card ? card.name : '?'} {/* Nesne varsa ismini (string), yoksa '?' göster */}
+                          {currentCardName || '?'}
                         </div>
                       );
                     })}
