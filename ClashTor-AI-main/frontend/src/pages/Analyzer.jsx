@@ -92,7 +92,7 @@ export const Analyzer = () => {
     }
 
     if (!playerTag.trim()) {
-      setErrorInfo({ title: "Player Tag Required", message: "Please enter a player tag to analyze." });
+      setErrorInfo({ title: "Oyuncu Etiketi Girilmedi!", message: "Lütfen analiz edebilmek için bir oyuncu etiketi girin!" });
       return;
     }
 
