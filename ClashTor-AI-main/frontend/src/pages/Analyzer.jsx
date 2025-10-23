@@ -55,6 +55,22 @@ export const Analyzer = () => {
 
   }, [user, authLoading, navigate, toast]);
 
+  const MAX_FREE_ANALYSIS = 2; // Sabit değer (Backend ile aynı olmalı)
+
+  // Tarih kontrolü için yardımcı fonksiyon (Bu fonksiyonun kapsamı tüm dosyayı kapsayabilir)
+  const isToday = (lastDate) => {
+    if (!lastDate) return false;
+    const last = new Date(lastDate);
+    const today = new Date();
+    return last.toDateString() === today.toDateString();
+  };
+
+  // --- KRİTİK: Değişkenlerin Hesaplamasını Buraya Taşıyoruz ---
+  const currentCount = user?.daily_analysis_count || 0;
+  const isLimitReachedToday = isToday(user?.last_analysis_date) && currentCount >= MAX_FREE_ANALYSIS;
+  const remainingCount = MAX_FREE_ANALYSIS - currentCount;
+  // --------------------------------------------------------------------------
+
   const handleAnalyze = async (e) => {
     e.preventDefault();
     setErrorInfo(null); // Önceki hatayı temizle
@@ -65,21 +81,6 @@ export const Analyzer = () => {
       navigate('/login');
       return;
     }
-
-    // Örnek: Eğer limit 2 ise
-    const MAX_FREE_ANALYSIS = 2; // Günde 2 analize izin veriyoruz (Backend ile aynı olmalı)
-
-    // Tarih kontrolü için utility
-    const isToday = (lastDate) => {
-      if (!lastDate) return false;
-      // Backend'den gelen ISO string veya Timestamp objesini Date objesine çevir
-      const last = new Date(lastDate);
-      const today = new Date();
-      return last.toDateString() === today.toDateString();
-    };
-
-    const currentCount = user.daily_analysis_count || 0;
-    const isLimitReachedToday = isToday(user.last_analysis_date) && currentCount >= MAX_FREE_ANALYSIS;
 
 
     if (!user.is_premium && isLimitReachedToday) {
