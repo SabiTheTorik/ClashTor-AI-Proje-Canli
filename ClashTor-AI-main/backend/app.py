@@ -642,8 +642,12 @@ def google_login():
                 'email': email,
                 'profile_picture_url': picture_url, # İlk kayıtta Google resmini kullan
                 'is_premium': False,
-                'has_used_free_analysis': False
-            }
+                # ESKİ: 'has_used_free_analysis': False  <-- ARTIK SİLİNDİ
+                    
+                # YENİ EKLENTİLER: Günlük Sayaç Mantığı
+                'daily_analysis_count': 0, 
+                'last_analysis_date': datetime.now(timezone.utc) 
+                }
             user_ref.set(new_user_data)
             user_data_to_send = new_user_data
             user_data_to_send['uid'] = uid # UID'yi ekle
