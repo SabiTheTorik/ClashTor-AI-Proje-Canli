@@ -398,34 +398,44 @@ export const Profile = () => {
                   <CardContent className="space-y-4 flex-grow flex flex-col">
                     {/* Deste */}
                     <div className="grid grid-cols-4 gap-2">
-                      {analysis.original_deck?.map((card, idx) => {
-                        // === YENİ BASİT MANTIK ===
-                        const isEvolved = card?.evolutionLevel > 0;
-                        const imageUrl = (isEvolved && card.iconUrls?.evolutionMedium)
-                          ? card.iconUrls.evolutionMedium
-                          : card.iconUrls?.medium;
-                        const currentCardName = card?.name;
-                        // === MANTIK SONU ===
+                      {analysis.original_deck
+                        // === YENİ SIRALAMA KODU BAŞLANGICI ===
+                        .slice() // Orijinal diziyi değiştirmemek için kopyala
+                        .sort((a, b) => {
+                          // Kartların evrim durumu (varsa 1, yoksa 0)
+                          const aIsEvo = a?.evolutionLevel > 0 ? 1 : 0;
+                          const bIsEvo = b?.evolutionLevel > 0 ? 1 : 0;
 
-                        return imageUrl ? ( // Resim URL'si varsa
-                          <div key={idx} className="relative aspect-[3/4]">
-                            <img
-                              src={imageUrl} // <-- Doğru resim URL'i burada
-                              alt={currentCardName || 'Kart'}
-                              className="w-full h-full object-contain rounded border border-gray-300 dark:border-gray-700" // <-- Çerçeve/border artık normal
-                            />
-                            {analysis.card_to_remove === currentCardName && (
-                              <div className="absolute inset-0 bg-red-500/70 flex items-center justify-center rounded">
-                                <i className="fa-solid fa-minus text-white text-3xl"></i>
-                              </div>
-                            )}
-                          </div>
-                        ) : ( // Resim URL'si yoksa placeholder
-                          <div key={idx} className="aspect-[3/4] bg-gray-200 dark:bg-gray-700 rounded text-xs flex items-center justify-center text-center text-gray-500 p-1">
-                            {currentCardName || '?'}
-                          </div>
-                        );
-                      })}
+                          // b'yi a'nın önüne al (yani evoları başa topla)
+                          return bIsEvo - aIsEvo;
+                        }).map((card, idx) => {
+                          // === YENİ BASİT MANTIK ===
+                          const isEvolved = card?.evolutionLevel > 0;
+                          const imageUrl = (isEvolved && card.iconUrls?.evolutionMedium)
+                            ? card.iconUrls.evolutionMedium
+                            : card.iconUrls?.medium;
+                          const currentCardName = card?.name;
+                          // === MANTIK SONU ===
+
+                          return imageUrl ? ( // Resim URL'si varsa
+                            <div key={idx} className="relative aspect-[3/4]">
+                              <img
+                                src={imageUrl} // <-- Doğru resim URL'i burada
+                                alt={currentCardName || 'Kart'}
+                                className="w-full h-full object-contain rounded border border-gray-300 dark:border-gray-700" // <-- Çerçeve/border artık normal
+                              />
+                              {analysis.card_to_remove === currentCardName && (
+                                <div className="absolute inset-0 bg-red-500/70 flex items-center justify-center rounded">
+                                  <i className="fa-solid fa-minus text-white text-3xl"></i>
+                                </div>
+                              )}
+                            </div>
+                          ) : ( // Resim URL'si yoksa placeholder
+                            <div key={idx} className="aspect-[3/4] bg-gray-200 dark:bg-gray-700 rounded text-xs flex items-center justify-center text-center text-gray-500 p-1">
+                              {currentCardName || '?'}
+                            </div>
+                          );
+                        })}
                     </div>
                     {/* Değişim */}
                     <div className="text-sm space-y-2 bg-blue-50 dark:bg-blue-950/40 p-3 rounded-lg border border-blue-200 dark:border-blue-800/50 flex-grow">
