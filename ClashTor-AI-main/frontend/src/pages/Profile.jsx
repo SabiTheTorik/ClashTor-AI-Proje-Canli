@@ -246,6 +246,9 @@ export const Profile = () => {
 
   // MEVCUT handleCopyDeck fonksiyonunu AŞAĞIDAKİ İLE DEĞİŞTİR
   // (Bu fonksiyon artık isMobile() fonksiyonunu kullanacak)
+  // Profile.jsx ve Decks.jsx dosyalarındaki
+  // MEVCUT handleCopyDeck fonksiyonunu AŞAĞIDAKİ İLE DEĞİŞTİR:
+
   const handleCopyDeck = async (deck, analysisId) => {
     // 1. Destede kart var mı kontrol et
     if (!deck || deck.length === 0) {
@@ -253,7 +256,7 @@ export const Profile = () => {
       return;
     }
 
-    // 2. Kart ID'lerini al (objeden 'id' alanını çek)
+    // 2. Kart ID'lerini al
     let cardIds = [];
     for (const card of deck) {
       if (!card.id) {
@@ -266,29 +269,27 @@ export const Profile = () => {
     // 3. ID'leri noktalı virgülle birleştir
     const cardIdString = cardIds.join(';');
 
-    // 4. Clash Royale bağlantısını oluştur
-    const copyLink = `https://link.clashroyale.com/deck/game/?deck=${cardIdString}`;
-
-    // 5. === YENİ CİHAZ KONTROLÜ ===
+    // 4. === YENİ CİHAZ KONTROLÜ VE LİNK FORMATI ===
     if (isMobile()) {
       // --- MOBİL CİHAZ ---
-      // Kullanıcıyı doğrudan linke yönlendir, bu da oyunu tetikleyecektir.
+      // DOĞRUDAN (custom protocol) deep link'i kullan.
+      // Bu, oyunu açıp "kopyala" komutunu iletecektir.
+      const deepLink = `clashroyale-inbox://copyDeck?deck=${cardIdString}`;
+
       toast({
         title: "Clash Royale Açılıyor...",
         description: "Deste oyuna aktarılıyor."
       });
-      // Linki her ihtimale karşı panoya da kopyala
-      try {
-        await navigator.clipboard.writeText(copyLink);
-      } catch (err) {
-        // Hata olursa sessiz kal, asıl amaç yönlendirme.
-      }
+
       // Yönlendirmeyi yap
-      window.location.href = copyLink;
+      window.location.href = deepLink;
 
     } else {
       // --- MASAÜSTÜ CİHAZ ---
-      // Önceki gibi panoya kopyala
+      // Kopyalama için standart web linkini (https) kullanmaya devam et.
+      // (Not: Toplulukta daha yaygın olan /en? formatına geçtim)
+      const copyLink = `https://link.clashroyale.com/deck/en?deck=${cardIdString}`;
+
       try {
         await navigator.clipboard.writeText(copyLink);
 
