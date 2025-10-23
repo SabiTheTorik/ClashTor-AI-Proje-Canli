@@ -774,40 +774,29 @@ def get_user_shared_analyses(username):
             analysis_data = analysis.to_dict()
             analysis_data['id'] = analysis.id 
             
-            # === YENİ GÜNCELLENMİŞ BLOK (EVRİM BİLGİSİNİ KORUR) ===
+            # === YENİ VE BASİTLEŞTİRİLMİŞ BLOK (BUNU KULLAN) ===
             original_deck_objects = []
             if 'original_deck' in analysis_data and isinstance(analysis_data['original_deck'], list):
-                for saved_card in analysis_data['original_deck']:
+                
+                for saved_item in analysis_data['original_deck']:
                     
-                    card_name_to_check = None
-                    evolution_level = None # <-- YENİ
-                    
-                    if isinstance(saved_card, dict):
-                        # YENİ VERİ FORMATI (Obje olarak kaydedilmiş)
-                        card_name_to_check = saved_card.get('name')
-                        evolution_level = saved_card.get('evolutionLevel') # Evrim bilgisini al
-                    elif isinstance(saved_card, str):
-                        # ESKİ VERİ FORMATI (String olarak kaydedilmiş)
-                        card_name_to_check = saved_card
-                    
-                    # Kartı all_cards_data'da bul
-                    if card_name_to_check and card_name_to_check in all_cards_data:
-                        # Temel kart verisini KOPYALA
-                        base_card_data = all_cards_data[card_name_to_check].copy()
+                    if isinstance(saved_item, dict):
+                        # YENİ FORMAT (Obje): 
+                        # Veritabanındaki obje zaten `iconUrls` (ve `evolutionMedium`) içeriyor.
+                        # Hiçbir şeyi değiştirmeden, olduğu gibi ekle.
+                        original_deck_objects.append(saved_item)
                         
-                        # YENİ: Kayıttan gelen evrim bilgisini temel veriye ekle/üzerine yaz
-                        if evolution_level:
-                            base_card_data['evolutionLevel'] = evolution_level
-                            
-                        original_deck_objects.append(base_card_data)
-                        
-                    elif card_name_to_check:
-                        # Kart all_cards_data'da yoksa (eski/yeni kart)
-                        placeholder = {"name": card_name_to_check, "iconUrls": {"medium": None}}
-                        if evolution_level:
-                            placeholder['evolutionLevel'] = evolution_level
-                        original_deck_objects.append(placeholder)
-                        
+                    elif isinstance(saved_item, str):
+                        # ESKİ FORMAT (String):
+                        # Bu eski bir kayıt, all_cards_data'dan temel bilgiyi bul.
+                        card_name_to_check = saved_item
+                        if card_name_to_check and card_name_to_check in all_cards_data:
+                            # all_cards_data'dan kopyala
+                            original_deck_objects.append(all_cards_data[card_name_to_check].copy())
+                        elif card_name_to_check:
+                            # Bulunamadı, yer tutucu oluştur
+                            original_deck_objects.append({"name": card_name_to_check, "iconUrls": {"medium": None}})
+            
             analysis_data['original_deck'] = original_deck_objects
             # === GÜNCELLEME SONU ===
 
@@ -853,31 +842,31 @@ def decks():
             analysis_data = analysis.to_dict()
             analysis_data['id'] = analysis.id
 
-            # --- DÜZELTME: Kart Adı veya Objesi Kontrolü ---
+            # === YENİ VE BASİTLEŞTİRİLMİŞ BLOK (BUNU KULLAN) ===
             original_deck_objects = []
             if 'original_deck' in analysis_data and isinstance(analysis_data['original_deck'], list):
-                # 'item' değişkeni string veya dict olabilir
-                for item in analysis_data['original_deck']:
-                    card_name_to_check = None # Kontrol edilecek kart adını bulalım
-                    if isinstance(item, str):
-                        card_name_to_check = item # Zaten string ise direkt kullan
-                    elif isinstance(item, dict) and 'name' in item:
-                        card_name_to_check = item.get('name') # Sözlük ise 'name' anahtarını al
-
-                    # Geçerli bir kart adı bulduysak devam et
-                    if card_name_to_check and card_name_to_check in all_cards_data:
-                        # Tam kart objesini all_cards_data'dan ekle
-                        original_deck_objects.append(all_cards_data[card_name_to_check])
-                    elif card_name_to_check:
-                        # Kart adı var ama all_cards_data'da yoksa yer tutucu ekle
-                        print(f"Uyarı: '{card_name_to_check}' kartı 'all_cards_data' içinde bulunamadı.")
-                        original_deck_objects.append({"name": card_name_to_check, "iconUrls": {"medium": None}})
-                    else:
-                        # Ne string ne de geçerli bir dict ise logla
-                        print(f"Uyarı: original_deck içinde geçersiz öğe bulundu: {item}")
-
-            analysis_data['original_deck'] = original_deck_objects # Güncellenmiş listeyi ata
-            # --- DÜZELTME SONU ---
+                
+                for saved_item in analysis_data['original_deck']:
+                    
+                    if isinstance(saved_item, dict):
+                        # YENİ FORMAT (Obje): 
+                        # Veritabanındaki obje zaten `iconUrls` (ve `evolutionMedium`) içeriyor.
+                        # Hiçbir şeyi değiştirmeden, olduğu gibi ekle.
+                        original_deck_objects.append(saved_item)
+                        
+                    elif isinstance(saved_item, str):
+                        # ESKİ FORMAT (String):
+                        # Bu eski bir kayıt, all_cards_data'dan temel bilgiyi bul.
+                        card_name_to_check = saved_item
+                        if card_name_to_check and card_name_to_check in all_cards_data:
+                            # all_cards_data'dan kopyala
+                            original_deck_objects.append(all_cards_data[card_name_to_check].copy())
+                        elif card_name_to_check:
+                            # Bulunamadı, yer tutucu oluştur
+                            original_deck_objects.append({"name": card_name_to_check, "iconUrls": {"medium": None}})
+            
+            analysis_data['original_deck'] = original_deck_objects
+            # === GÜNCELLEME SONU ===--
 
             # Kullanıcı bilgisi ve timestamp işlemleri aynı kalıyor...
             user_id = analysis_data.get('user_id')
@@ -1206,17 +1195,31 @@ def get_user_analyses(username):
             analysis_data = analysis.to_dict()
             analysis_data['id'] = analysis.id 
             
-            # === YENİ: Kart İsimlerini Kart Objelerine Çevirme ===
+            # === YENİ VE BASİTLEŞTİRİLMİŞ BLOK (BUNU KULLAN) ===
             original_deck_objects = []
             if 'original_deck' in analysis_data and isinstance(analysis_data['original_deck'], list):
-                for item in analysis_data['original_deck']:
-                    card_name_to_check = item if isinstance(item, str) else item.get('name') if isinstance(item, dict) else None
-                    if card_name_to_check and card_name_to_check in all_cards_data:
-                        original_deck_objects.append(all_cards_data[card_name_to_check])
-                    elif card_name_to_check:
-                         original_deck_objects.append({"name": card_name_to_check, "iconUrls": {"medium": None}})
-            analysis_data['original_deck'] = original_deck_objects # Güncellenmiş listeyi ata
-            # === ÇEVİRME SONU ===
+                
+                for saved_item in analysis_data['original_deck']:
+                    
+                    if isinstance(saved_item, dict):
+                        # YENİ FORMAT (Obje): 
+                        # Veritabanındaki obje zaten `iconUrls` (ve `evolutionMedium`) içeriyor.
+                        # Hiçbir şeyi değiştirmeden, olduğu gibi ekle.
+                        original_deck_objects.append(saved_item)
+                        
+                    elif isinstance(saved_item, str):
+                        # ESKİ FORMAT (String):
+                        # Bu eski bir kayıt, all_cards_data'dan temel bilgiyi bul.
+                        card_name_to_check = saved_item
+                        if card_name_to_check and card_name_to_check in all_cards_data:
+                            # all_cards_data'dan kopyala
+                            original_deck_objects.append(all_cards_data[card_name_to_check].copy())
+                        elif card_name_to_check:
+                            # Bulunamadı, yer tutucu oluştur
+                            original_deck_objects.append({"name": card_name_to_check, "iconUrls": {"medium": None}})
+            
+            analysis_data['original_deck'] = original_deck_objects
+            # === GÜNCELLEME SONU ===
             
             # Timestamp'i ISO string'e çevir
             if 'timestamp' in analysis_data and isinstance(analysis_data['timestamp'], datetime):
