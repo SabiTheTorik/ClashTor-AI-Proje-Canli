@@ -68,20 +68,20 @@ export const ExampleAnalysis = () => {
                 {/* --- AI TAM METİN ANALİZİ --- */}
                 <Card className="shadow-xl border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Info className="h-5 w-5 text-blue-500" />
-                            Detaylı Yapay Zeka Raporu
-                        </CardTitle>
-                        <CardDescription>Bu çıktı, gerçek maç verilerine dayanmaktadır.</CardDescription>
+                        {/* ... (Başlıklar aynı kalır) ... */}
                     </CardHeader>
                     <CardContent>
+                        {/* KRİTİK DÜZELTME: Metni daha iyi render etmek için */}
                         <div
                             className="prose dark:prose-invert max-w-none ai-analysis-content"
-                            dangerouslySetInnerHTML={{ __html: analysisHtml }}
+                            // Metindeki tüm satır sonlarını (<br/>) kaldırıp, 
+                            // Markdown kütüphanesiyle HTML olarak render etmelisiniz.
+                            // (Markdown kütüphaneniz yoksa, aşağıdaki düz HTML kullanın)
+                            dangerouslySetInnerHTML={{ __html: MOCK_AI_OUTPUT.replace(/###/g, '<h4>').replace(/\n/g, '<p/>') }}
                         />
                     </CardContent>
                 </Card>
-        
+
 
                 {/* --- CTA - Giriş Yap Butonu --- */}
                 <div className="text-center mt-10">
