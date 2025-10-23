@@ -1,0 +1,4 @@
+/api/* https://clashtor-ai.onrender.com/api/:splat 200
+
+# Tüm dinamik ve statik yolları index.html'e yönlendirir.
+/* /index.html 200
