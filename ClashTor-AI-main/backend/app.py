@@ -132,7 +132,9 @@ def get_current_user():
                     'email': user_data.get('email'),
                     'profile_picture_url': user_data.get('profile_picture_url'),
                     'is_premium': user_data.get('is_premium', False),
-                    'has_used_free_analysis': user_data.get('has_used_free_analysis', False)
+                    # YENİ ALANLAR EKLENDİ
+                    'daily_analysis_count': user_data.get('daily_analysis_count', 0),
+                    'last_analysis_date': user_data.get('last_analysis_date')
                 })
             else:
                 # Firestore'da kullanıcı bulunamazsa (nadiren olmalı)
@@ -432,7 +434,11 @@ def register():
                     'email': email, 
                     'profile_picture_url': None,
                     'is_premium': False,
-                    'has_used_free_analysis': False
+                    # ESKİ: 'has_used_free_analysis': False  <-- ARTIK SİLİNDİ
+                    
+                    # YENİ EKLENTİLER: Günlük Sayaç Mantığı
+                    'daily_analysis_count': 0, 
+                    'last_analysis_date': datetime.now(timezone.utc) 
                 })
             except Exception as firestore_error:
                  # Firestore'a yazılamazsa Auth kullanıcısını silmeyi düşünebilirsin (temizlik için)
@@ -1010,15 +1016,30 @@ def analyze_deck_api():
 
     # Premium ve deneme hakkı kontrolü
     is_premium = user_data.get('is_premium', False)
-    has_used_free = user_data.get('has_used_free_analysis', False)
-
-    if not is_premium and has_used_free:
+    
+    # Varsayılan değerler 0 olarak ayarlanır
+    current_count = user_data.get('daily_analysis_count', 0)
+    last_date_ts = user_data.get('last_analysis_date') 
+    
+    # Yeni gün kontrolü (Firestore'dan gelen datetime objesini kullanırız)
+    today = datetime.now(timezone.utc).date()
+    
+    # Firestore'dan gelen Timestamp objesi (datetime.datetime objesi) kullanılır
+    last_analysis_date = last_date_ts.date() if last_date_ts else None 
+    
+    # Eğer son analiz bugünden önceyse, sayacı sıfırla
+    if last_analysis_date != today:
+        current_count = 0
+    
+    MAX_FREE_ANALYSIS = 2  # Günde izin verilen analiz sayısı
+    
+    if not is_premium and current_count >= MAX_FREE_ANALYSIS:
         return jsonify({
             'error_info': {
-                "title": "Analiz Limiti Doldu",
-                "message": "Ücretsiz analiz hakkınızı kullandınız. Sınırsız analiz için lütfen Premium'a yükseltin."
+                "title": "Günlük Limit Doldu",
+                "message": f"Ücretsiz deneme limitinizi ({MAX_FREE_ANALYSIS}) doldurdunuz. Sınırsız analiz için Premium'a yükseltin."
             }
-        }), 403
+        }), 40
 
     data = request.get_json()
     player_tag = data.get('player_tag', '').strip().upper()
@@ -1078,9 +1099,14 @@ def analyze_deck_api():
         # Ücretsiz hakkı işaretle
         if not is_premium:
             try:
-                db.collection('users').document(uid).update({'has_used_free_analysis': True})
+                new_count = current_count + 1
+                db.collection('users').document(uid).update({
+                    'daily_analysis_count': new_count,
+                    'last_analysis_date': datetime.now(timezone.utc)
+                })
             except Exception as e:
-                print(f"Firestore güncelleme hatası (has_used_free_analysis): {e}")
+                print(f"Firestore kota güncelleme hatası: {e}")
+                # Bu hata analizi durdurmaz, sadece kotayı kaybetme riski vardır.
 
         # Başarılı JSON cevabını oluştur ve döndür
         response_payload = {

@@ -66,11 +66,26 @@ export const Analyzer = () => {
       return;
     }
 
-    // Premium kontrolünü frontend'de de yapabiliriz (opsiyonel ama iyi UX)
-    if (user.has_used_free_analysis && !user.is_premium) {
+    // Örnek: Eğer limit 2 ise
+    const MAX_FREE_ANALYSIS = 2; // Günde 2 analize izin veriyoruz (Backend ile aynı olmalı)
+
+    // Tarih kontrolü için utility
+    const isToday = (lastDate) => {
+      if (!lastDate) return false;
+      // Backend'den gelen ISO string veya Timestamp objesini Date objesine çevir
+      const last = new Date(lastDate);
+      const today = new Date();
+      return last.toDateString() === today.toDateString();
+    };
+
+    const currentCount = user.daily_analysis_count || 0;
+    const isLimitReachedToday = isToday(user.last_analysis_date) && currentCount >= MAX_FREE_ANALYSIS;
+
+
+    if (!user.is_premium && isLimitReachedToday) {
       setErrorInfo({
-        title: "Analysis Limit Reached",
-        message: "You've used your free analysis. Upgrade to Premium for unlimited access."
+        title: "Günlük Limit Doldu", // Türkçe Başlık
+        message: `Bugün için ücretsiz analiz limitiniz (${MAX_FREE_ANALYSIS}) doldu. Sınırsız erişim için Premium'a yükseltin.` // Türkçe Açıklama
       });
       return; // API'ye istek atmadan dur
     }
@@ -84,7 +99,7 @@ export const Analyzer = () => {
 
     try {
       const response = await axios.post(`${API_BASE_URL}/api/analyze`,
-        { 
+        {
           player_tag: playerTag,
           analyze_mode: analyzeMode // <--- DÜZELTME: Seçili modu buraya ekleyin
         }, // Veriyi JSON olarak gönderiyoruz
@@ -228,16 +243,28 @@ export const Analyzer = () => {
                 {/* Kullanıcı Durum Mesajı */}
                 <div className="text-sm mt-3 flex items-center gap-2 px-1">
                   {user.is_premium ? (
-                    <span className="text-green-600 dark:text-green-400"><i className="fa-solid fa-gem mr-1"></i> Premium Aktif: Sınırsız analiz.</span>
-                  ) : user.has_used_free_analysis ? (
-                    <span className="text-red-600 dark:text-red-400"><AlertCircle className="inline h-4 w-4 mr-1" /> Ücretsiz hakkınız doldu.</span>
+                    <span className="text-green-600 dark:text-green-400">
+                      <i className="fa-solid fa-gem mr-1"></i> Premium Aktif: Sınırsız analiz.
+                    </span>
+                  ) : isLimitReachedToday ? (
+                    <span className="text-red-600 dark:text-red-400">
+                      <AlertCircle className="inline h-4 w-4 mr-1" /> Günlük limitiniz doldu ({currentCount}/{MAX_FREE_ANALYSIS}).
+                    </span>
                   ) : (
-                    <span className="text-blue-600 dark:text-blue-400"><Info className="inline h-4 w-4 mr-1" /> 1 ücretsiz analiz hakkınız kaldı.</span>
+                    <span className="text-blue-600 dark:text-blue-400">
+                      <Info className="inline h-4 w-4 mr-1" />
+                      {remainingCount} ücretsiz analiz hakkınız kaldı.
+                    </span>
                   )}
                 </div>
-                {/* Limit dolduysa Premium butonu */}
-                {user.has_used_free_analysis && !user.is_premium && (
-                  <Button variant="outline" onClick={() => navigate('/premium')} className="w-full mt-4 border-yellow-500 text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-950/20">
+
+                {/* Limit dolduysa Premium butonu (Aşağıdaki butonun koşulunu da buna göre güncelleyin) */}
+                {isLimitReachedToday && !user.is_premium && (
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate('/premium')}
+                    className="w-full mt-4 border-yellow-500 text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-950/20"
+                  >
                     <Zap className="h-4 w-4 mr-2" />
                     Premium'a Yükselt
                   </Button>
