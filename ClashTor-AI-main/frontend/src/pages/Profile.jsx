@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from '../components/ui/label';
 import { Separator } from '../components/ui/separator';
 // Gerekli tüm ikonları import et
-import { Crown, Edit, Trash2, Share2, EyeOff, Calendar, Zap, ArrowDownUp, Loader2, Info } from 'lucide-react';
+import { Crown, Edit, Trash2, Share2, EyeOff, Calendar, Zap, ArrowDownUp, Loader2, Info, Copy, Check } from 'lucide-react'; // <-- Copy ve Check eklendi
 import { useToast } from '../hooks/use-toast';
 import {
   AlertDialog,
@@ -35,6 +35,7 @@ export const Profile = () => {
   const { username } = useParams(); // URL'den görüntülenen profilin kullanıcı adı
   const { user: loggedInUser, updateUser, loading: authLoading } = useAuth(); // Giriş yapmış kullanıcı ve yüklenme durumu
   const { toast } = useToast();
+  const [copiedDeckId, setCopiedDeckId] = useState(null);
   const navigate = useNavigate();
 
   // --- State Tanımlamaları ---
@@ -236,6 +237,52 @@ export const Profile = () => {
         console.log("Toast çağrıldıktan hemen sonra.");
       } else { throw new Error(response.data.error); }
     } catch (error) { /* ... Hata mesajı ... */ }
+  };
+
+  const handleCopyDeck = async (deck, analysisId) => {
+    // 1. Destede kart var mı kontrol et
+    if (!deck || deck.length === 0) {
+      toast({ title: "Hata", description: "Destede kart bulunamadı.", variant: "destructive" });
+      return;
+    }
+
+    // 2. Kart ID'lerini al (objeden 'id' alanını çek)
+    //    Eğer bir kartın ID'si yoksa (eski veri) hata ver
+    let cardIds = [];
+    for (const card of deck) {
+      if (!card.id) {
+        toast({ title: "Kopyalanamadı", description: "Bu destenin (eski veri) kart ID bilgisi eksik.", variant: "destructive" });
+        return;
+      }
+      cardIds.push(card.id);
+    }
+    
+    // 3. ID'leri noktalı virgülle birleştir
+    const cardIdString = cardIds.join(';');
+
+    // 4. Clash Royale bağlantısını oluştur
+    const copyLink = `https://link.clashroyale.com/deck/game/?deck=${cardIdString}`;
+
+    // 5. Panoya kopyala
+    try {
+      await navigator.clipboard.writeText(copyLink);
+      
+      // 6. Başarı bildirimi ver
+      toast({
+        title: "Deste Kopyalandı!",
+        description: "Oyun içi deste bağlantısı panonuza kopyalandı."
+      });
+      
+      // 7. Butonun metnini 2 saniyeliğine değiştir
+      setCopiedDeckId(analysisId);
+      setTimeout(() => {
+        setCopiedDeckId(null);
+      }, 2000);
+
+    } catch (err) {
+      console.error('Failed to copy deck link: ', err);
+      toast({ title: "Kopyalanamadı", description: "Panoya yazma izni alınamadı.", variant: "destructive" });
+    }
   };
 
   // --- Render ---
@@ -455,18 +502,39 @@ export const Profile = () => {
                     </div>
                     {/* Butonlar (Sadece kendi profili ise) */}
                     {isOwnProfile && (
-                      <div className="flex gap-2 pt-2 mt-auto"> {/* mt-auto butonları en alta iter */}
+                      <div className="flex gap-2 pt-2 mt-auto">
+                        
+                        {/* Paylaş Butonu (Mevcut) */}
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => handleToggleShare(analysis.id)}
                           className="flex-1 text-xs"
                         >
-                          {/* === DEĞİŞİKLİK BURADA === */}
                           {analysis.is_shared ? <EyeOff className="h-3.5 w-3.5 mr-1" /> : <Share2 className="h-3.5 w-3.5 mr-1" />}
                           {analysis.is_shared ? 'Paylaşımı Kaldır' : 'Paylaş'}
-                          {/* === DEĞİŞİKLİK SONU === */}
                         </Button>
+
+                        {/* === YENİ KOPYALA BUTONU === */}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleCopyDeck(analysis.original_deck, analysis.id)}
+                          className="flex-1 text-xs"
+                        >
+                          {copiedDeckId === analysis.id ? (
+                            <>
+                              <Check className="h-3.5 w-3.5 mr-1" />
+                              Kopyalandı
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="h-3.5 w-3.5 mr-1" />
+                              Kopyala
+                            </>
+                          )}
+                        </Button>
+                        {/* === BUTON SONU === */}
                         {/* === SİLME BUTONU GÜNCELLEMESİ === */}
                         <AlertDialog open={isDeleteDialogOpen && analysisToDelete === analysis.id} onOpenChange={(open) => { if (!open) setAnalysisToDelete(null); setIsDeleteDialogOpen(open); }}>
                           <AlertDialogTrigger asChild>

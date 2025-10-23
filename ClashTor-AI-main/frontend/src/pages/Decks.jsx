@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../co
 import { Badge } from '../components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '../components/ui/avatar';
 import { Separator } from '../components/ui/separator'; // Separator eklendi
-import { Calendar, Share2, ArrowDownUp, Loader2 } from 'lucide-react'; // Loader2 eklendi
+import { Calendar, Share2, ArrowDownUp, Loader2, Copy, Check } from 'lucide-react';
 import { useToast } from '../hooks/use-toast'; // Hata gösterimi için
 import { Link } from 'react-router-dom';
 import { mockCards } from '../mock'; // Kart resimleri için geçici olarak kullanılıyor
@@ -19,6 +19,7 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:500
 export const Decks = () => {
   const { user } = useAuth(); // Gerekirse kullanıcı bilgisi için
   const { toast } = useToast();
+  const [copiedDeckId, setCopiedDeckId] = useState(null);
 
   // --- YENİ: State'ler ---
   const [sharedAnalyses, setSharedAnalyses] = useState([]);
@@ -68,6 +69,54 @@ export const Decks = () => {
       </div>
     );
   }
+
+  // Decks.jsx -> Decks fonksiyonunun içine
+
+  const handleCopyDeck = async (deck, analysisId) => {
+    // 1. Destede kart var mı kontrol et
+    if (!deck || deck.length === 0) {
+      toast({ title: "Hata", description: "Destede kart bulunamadı.", variant: "destructive" });
+      return;
+    }
+
+    // 2. Kart ID'lerini al (objeden 'id' alanını çek)
+    //    Eğer bir kartın ID'si yoksa (eski veri) hata ver
+    let cardIds = [];
+    for (const card of deck) {
+      if (!card.id) {
+        toast({ title: "Kopyalanamadı", description: "Bu destenin (eski veri) kart ID bilgisi eksik.", variant: "destructive" });
+        return;
+      }
+      cardIds.push(card.id);
+    }
+
+    // 3. ID'leri noktalı virgülle birleştir
+    const cardIdString = cardIds.join(';');
+
+    // 4. Clash Royale bağlantısını oluştur
+    const copyLink = `https://link.clashroyale.com/deck/game/?deck=${cardIdString}`;
+
+    // 5. Panoya kopyala
+    try {
+      await navigator.clipboard.writeText(copyLink);
+
+      // 6. Başarı bildirimi ver
+      toast({
+        title: "Deste Kopyalandı!",
+        description: "Oyun içi deste bağlantısı panonuza kopyalandı."
+      });
+
+      // 7. Butonun metnini 2 saniyeliğine değiştir
+      setCopiedDeckId(analysisId);
+      setTimeout(() => {
+        setCopiedDeckId(null);
+      }, 2000);
+
+    } catch (err) {
+      console.error('Failed to copy deck link: ', err);
+      toast({ title: "Kopyalanamadı", description: "Panoya yazma izni alınamadı.", variant: "destructive" });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-cyan-50 dark:from-gray-900 dark:via-blue-950 dark:to-gray-900 pt-20 pb-12">
@@ -182,13 +231,38 @@ export const Decks = () => {
                         );
                       })}
                   </div>
-                  {/* Değişim Bilgisi */}
-                  <div className="text-sm space-y-2 bg-blue-50 dark:bg-blue-950/40 p-3 rounded-lg border border-blue-200 dark:border-blue-800/50 mt-auto"> {/* mt-auto alta iter */}
-                    <div className="flex justify-between items-center"><span>Çıkar:</span><span className="font-medium text-red-600 dark:text-red-400">{analysis.card_to_remove || '-'}</span></div>
-                    <div className="flex justify-between items-center"><span>Ekle:</span><span className="font-medium text-green-600 dark:text-green-400">{analysis.card_to_add || '-'}</span></div>
-                    <Separator className="my-2 bg-blue-200 dark:bg-blue-800/50" />
-                    <div className="flex justify-between items-center"><span>Ort. İksir:</span><span className="font-semibold text-blue-700 dark:text-blue-300">{analysis.original_avg_elixir || '?'} → {analysis.new_avg_elixir || '?'}</span></div>
+                  {/* === YENİ: KARTIN ALT KISMI (mt-auto ile alta itilir) === */}
+                  <div className="mt-auto space-y-4 pt-4"> {/* pt-4 boşluk için */}
+
+                    {/* Değişim Bilgisi (Eski div'i buraya taşı) */}
+                    <div className="text-sm space-y-2 bg-blue-50 dark:bg-blue-950/40 p-3 rounded-lg border border-blue-200 dark:border-blue-800/50">
+                      <div className="flex justify-between items-center"><span>Çıkar:</span><span className="font-medium text-red-600 dark:text-red-400">{analysis.card_to_remove || '-'}</span></div>
+                      <div className="flex justify-between items-center"><span>Ekle:</span><span className="font-medium text-green-600 dark:text-green-400">{analysis.card_to_add || '-'}</span></div>
+                      <Separator className="my-2 bg-blue-200 dark:bg-blue-800/50" />
+                      <div className="flex justify-between items-center"><span>Ort. İksir:</span><span className="font-semibold text-blue-700 dark:text-blue-300">{analysis.original_avg_elixir || '?'} → {analysis.new_avg_elixir || '?'}</span></div>
+                    </div>
+
+                    {/* === YENİ Kopyala Butonu === */}
+                    <Button
+                      onClick={() => handleCopyDeck(analysis.original_deck, analysis.id)}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      {copiedDeckId === analysis.id ? (
+                        <>
+                          <Check className="h-4 w-4 mr-2" />
+                          Kopyalandı!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-4 w-4 mr-2" />
+                          Desteyi Oyuna Kopyala
+                        </>
+                      )}
+                    </Button>
+                    {/* === YENİ KOPYALA BUTONU SONU === */}
                   </div>
+                  {/* === YENİ WRAPPER SONU === */}
                 </CardContent>
               </Card>
             ))}
