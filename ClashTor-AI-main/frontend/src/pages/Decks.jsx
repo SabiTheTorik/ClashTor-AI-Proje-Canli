@@ -72,6 +72,13 @@ export const Decks = () => {
 
   // Decks.jsx -> Decks fonksiyonunun içine
 
+  const isMobile = () => {
+    // Mobil cihaz tespiti için basit bir regex
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  };
+
+  // MEVCUT handleCopyDeck fonksiyonunu AŞAĞIDAKİ İLE DEĞİŞTİR
+  // (Bu fonksiyon artık isMobile() fonksiyonunu kullanacak)
   const handleCopyDeck = async (deck, analysisId) => {
     // 1. Destede kart var mı kontrol et
     if (!deck || deck.length === 0) {
@@ -80,7 +87,6 @@ export const Decks = () => {
     }
 
     // 2. Kart ID'lerini al (objeden 'id' alanını çek)
-    //    Eğer bir kartın ID'si yoksa (eski veri) hata ver
     let cardIds = [];
     for (const card of deck) {
       if (!card.id) {
@@ -96,25 +102,44 @@ export const Decks = () => {
     // 4. Clash Royale bağlantısını oluştur
     const copyLink = `https://link.clashroyale.com/deck/game/?deck=${cardIdString}`;
 
-    // 5. Panoya kopyala
-    try {
-      await navigator.clipboard.writeText(copyLink);
-
-      // 6. Başarı bildirimi ver
+    // 5. === YENİ CİHAZ KONTROLÜ ===
+    if (isMobile()) {
+      // --- MOBİL CİHAZ ---
+      // Kullanıcıyı doğrudan linke yönlendir, bu da oyunu tetikleyecektir.
       toast({
-        title: "Deste Kopyalandı!",
-        description: "Oyun içi deste bağlantısı panonuza kopyalandı."
+        title: "Clash Royale Açılıyor...",
+        description: "Deste oyuna aktarılıyor."
       });
+      // Linki her ihtimale karşı panoya da kopyala
+      try {
+        await navigator.clipboard.writeText(copyLink);
+      } catch (err) {
+        // Hata olursa sessiz kal, asıl amaç yönlendirme.
+      }
+      // Yönlendirmeyi yap
+      window.location.href = copyLink;
 
-      // 7. Butonun metnini 2 saniyeliğine değiştir
-      setCopiedDeckId(analysisId);
-      setTimeout(() => {
-        setCopiedDeckId(null);
-      }, 2000);
+    } else {
+      // --- MASAÜSTÜ CİHAZ ---
+      // Önceki gibi panoya kopyala
+      try {
+        await navigator.clipboard.writeText(copyLink);
 
-    } catch (err) {
-      console.error('Failed to copy deck link: ', err);
-      toast({ title: "Kopyalanamadı", description: "Panoya yazma izni alınamadı.", variant: "destructive" });
+        toast({
+          title: "Deste Linki Kopyalandı!",
+          description: "Masaüstünde olduğunuz için link panonuza kopyalandı."
+        });
+
+        // Butonun metnini 2 saniyeliğine değiştir
+        setCopiedDeckId(analysisId);
+        setTimeout(() => {
+          setCopiedDeckId(null);
+        }, 2000);
+
+      } catch (err) {
+        console.error('Failed to copy deck link: ', err);
+        toast({ title: "Kopyalanamadı", description: "Panoya yazma izni alınamadı.", variant: "destructive" });
+      }
     }
   };
 
