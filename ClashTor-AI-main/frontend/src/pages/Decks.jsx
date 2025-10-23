@@ -84,7 +84,10 @@ export const Decks = () => {
   // MEVCUT handleCopyDeck fonksiyonunu AŞAĞIDAKİ İLE DEĞİŞTİR:
 
   // Profile.jsx ve Decks.jsx dosyalarındaki
-// MEVCUT handleCopyDeck fonksiyonunu AŞAĞIDAKİ İLE DEĞİŞTİR:
+  // MEVCUT handleCopyDeck fonksiyonunu AŞAĞIDAKİ İLE DEĞİŞTİR:
+
+  // Profile.jsx ve Decks.jsx dosyalarındaki
+  // MEVCUT handleCopyDeck fonksiyonunu AŞAĞIDAKİ İLE DEĞİŞTİR:
 
   const handleCopyDeck = async (deck, analysisId) => {
     // 1. Destede kart var mı kontrol et
@@ -102,25 +105,26 @@ export const Decks = () => {
       }
       cardIds.push(card.id);
     }
-    
+
     // 3. ID'leri noktalı virgülle birleştir
     const cardIdString = cardIds.join(';');
+    // 8 kart için 8 tane "0" slot bilgisi
+    const slotsString = '0;0;0;0;0;0;0;0';
 
-    // 4. === DOĞRU LİNK FORMATI ===
-    // /game/ YERİNE /en? KULLANIYORUZ (Reddit'teki gibi)
-    const correctDeckLink = `https://link.clashroyale.com/deck/en?deck=${cardIdString}`;
+    // 4. === SENİN SAĞLADIĞIN DOĞRU LİNK FORMATI ===
+    // Bu, "https" wrapper'ı içinde "clashroyale://" deep link'ini barındırır.
+    const correctDeckLink = `https://link.clashroyale.com/tr?clashroyale://copyDeck?deck=${cardIdString}&slots=${slotsString}`;
 
 
-    // 5. === CİHAZ KONTROLÜ ===
+    // 5. === CİHAZ KONTROLÜ (Aynı kaldı) ===
     if (isMobile()) {
       // --- MOBİL CİHAZ ---
-      // Doğrudan bu linke yönlendirme, işletim sisteminin 
-      // oyunu AÇIP desteyi yüklemesini tetiklemelidir.
+      // Bu linke yönlendirme, sunucudan oyunu açma komutunu tetiklemeli.
       toast({
         title: "Clash Royale Açılıyor...",
         description: "Deste oyuna aktarılıyor."
       });
-      
+
       // Yönlendirmeyi yap
       window.location.href = correctDeckLink;
 
@@ -129,12 +133,12 @@ export const Decks = () => {
       // Linki panoya kopyala
       try {
         await navigator.clipboard.writeText(correctDeckLink);
-        
+
         toast({
           title: "Deste Linki Kopyalandı!",
           description: "Masaüstünde olduğunuz için link panonuza kopyalandı."
         });
-        
+
         // Butonun metnini 2 saniyeliğine değiştir
         setCopiedDeckId(analysisId);
         setTimeout(() => {
