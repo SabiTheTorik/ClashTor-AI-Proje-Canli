@@ -130,12 +130,13 @@ export const Analyzer = () => {
 
     setIsSaving(true); // Kaydetme işlemini başlat
 
-    const cardNames = analysisData.deck_cards.map(card => card.name);
+    const fullDeckObjects = analysisData.deck_cards; // <-- YENİ SATIRI EKLE (Tüm objeyi al)
 
     try {
       const response = await axios.post(`${API_BASE_URL}/save-analysis`,
         {
-          original_deck: cardNames,
+          // original_deck: cardNames, // <-- ESKİ SATIRI SİL
+          original_deck: fullDeckObjects, // <-- YENİ SATIRI EKLE
           card_to_remove: analysisData.card_swap_info.remove,
           card_to_add: analysisData.card_swap_info.add,
           original_avg_elixir: analysisData.elixir_info.original,
