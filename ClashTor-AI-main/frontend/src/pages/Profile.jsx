@@ -244,19 +244,12 @@ export const Profile = () => {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   };
 
-  // MEVCUT handleCopyDeck fonksiyonunu AŞAĞIDAKİ İLE DEĞİŞTİR
-  // (Bu fonksiyon artık isMobile() fonksiyonunu kullanacak)
   // Profile.jsx ve Decks.jsx dosyalarındaki
   // MEVCUT handleCopyDeck fonksiyonunu AŞAĞIDAKİ İLE DEĞİŞTİR:
-
-  // Profile.jsx ve Decks.jsx dosyalarındaki
-  // MEVCUT handleCopyDeck fonksiyonunu AŞAĞIDAKİ İLE DEĞİŞTİR:
-
-  // Profile.jsx ve Decks.jsx dosyalarındaki
-  // MEVCUT handleCopyDeck fonksiyonunu AŞAĞIDAKİ İLE DEĞİŞTİR:
+  // ('isMobile' fonksiyonu aynı kalabilir)
 
   const handleCopyDeck = async (deck, analysisId) => {
-    // 1. Destede kart var mı kontrol et
+    // 1. Deste var mı kontrol et
     if (!deck || deck.length === 0) {
       toast({ title: "Hata", description: "Destede kart bulunamadı.", variant: "destructive" });
       return;
@@ -266,53 +259,44 @@ export const Profile = () => {
     let cardIds = [];
     for (const card of deck) {
       if (!card.id) {
+        // Player tag'a ihtiyacımız kalmadığı için bu eski kayıtlar da çalışacak!
         toast({ title: "Kopyalanamadı", description: "Bu destenin (eski veri) kart ID bilgisi eksik.", variant: "destructive" });
         return;
       }
       cardIds.push(card.id);
     }
-
-    // 3. ID'leri noktalı virgülle birleştir
     const cardIdString = cardIds.join(';');
-    // 8 kart için 8 tane "0" slot bilgisi
-    const slotsString = '0;0;0;0;0;0;0;0';
 
-    // 4. === SENİN SAĞLADIĞIN DOĞRU LİNK FORMATI ===
-    // Bu, "https" wrapper'ı içinde "clashroyale://" deep link'ini barındırır.
-    const correctDeckLink = `https://link.clashroyale.com/tr?clashroyale://copyDeck?deck=${cardIdString}&slots=${slotsString}`;
+    // 3. === SİTEDE GÖRDÜĞÜN LİNKE GÖRE PARAMETRELER ===
+    const slotsString = '0;0;0;0;0;0;0;0'; // 8 slot
+    const staticL = 'Royals';
+    const staticTT = '159000000'; // Sitede gördüğün varsayılan token
+
+    // 4. === NİHAİ LİNK FORMATI ===
+    // /en/ yolunu ve l, slots, tt parametrelerini kullanıyoruz.
+    const deckLink = `https://link.clashroyale.com/en/?clashroyale://copyDeck?deck=${cardIdString}&l=${staticL}&slots=${slotsString}&tt=${staticTT}`;
 
 
     // 5. === CİHAZ KONTROLÜ (Aynı kaldı) ===
     if (isMobile()) {
       // --- MOBİL CİHAZ ---
-      // Bu linke yönlendirme, sunucudan oyunu açma komutunu tetiklemeli.
       toast({
         title: "Clash Royale Açılıyor...",
         description: "Deste oyuna aktarılıyor."
       });
-
-      // Yönlendirmeyi yap
-      window.location.href = correctDeckLink;
+      window.location.href = deckLink;
 
     } else {
       // --- MASAÜSTÜ CİHAZ ---
-      // Linki panoya kopyala
       try {
-        await navigator.clipboard.writeText(correctDeckLink);
-
+        await navigator.clipboard.writeText(deckLink);
         toast({
           title: "Deste Linki Kopyalandı!",
           description: "Masaüstünde olduğunuz için link panonuza kopyalandı."
         });
-
-        // Butonun metnini 2 saniyeliğine değiştir
         setCopiedDeckId(analysisId);
-        setTimeout(() => {
-          setCopiedDeckId(null);
-        }, 2000);
-
+        setTimeout(() => setCopiedDeckId(null), 2000);
       } catch (err) {
-        console.error('Failed to copy deck link: ', err);
         toast({ title: "Kopyalanamadı", description: "Panoya yazma izni alınamadı.", variant: "destructive" });
       }
     }
