@@ -106,7 +106,7 @@ export const Decks = () => {
     // 3. === SİTEDE GÖRDÜĞÜN LİNKE GÖRE PARAMETRELER ===
     const slotsString = '0;0;0;0;0;0;0;0'; // 8 slot
     const staticL = 'Royals';
-    const staticTT = '159000000'; // Sitede gördüğün varsayılan token
+    const staticTT = '159000002'; // Sitede gördüğün varsayılan token
 
     // 4. === NİHAİ LİNK FORMATI ===
     // /en/ yolunu ve l, slots, tt parametrelerini kullanıyoruz.
