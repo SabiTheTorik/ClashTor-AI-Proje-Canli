@@ -7,6 +7,12 @@ import { useAuth } from '../contexts/AuthContext'; // Auth context'i import et
 export const Home = () => {
   const { user } = useAuth(); // Kullanıcı durumunu al
 
+  // === YENİ GÜVENLİ YÖNLENDİRME ===
+  // Giriş yapmış kullanıcıyı /analyzer yerine /profile sayfasına yönlendir
+  // Bot (user=null) ise /register'a yönlenecek, bu AdSense için güvenlidir.
+  const ctaLink = user ? `/profile/${user.username}` : '/register';
+  const ctaText = user ? 'Profiline Git' : 'Ücretsiz Başla';
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-cyan-50 dark:from-gray-900 dark:via-blue-950 dark:to-gray-900">
       <div className="relative overflow-hidden">
@@ -35,15 +41,18 @@ export const Home = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-              <Link to={user ? '/analyzer' : '/register'}>
-                <Button size="lg" className="group bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-8 py-6 text-lg shadow-xl shadow-blue-500/25 hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300 transform hover:-translate-y-1"> {/* Transform eklendi */}
-                  {user ? 'Analize Başla' : 'Ücretsiz Başla'} {/* Türkçe Çeviri & Dinamik Metin */}
+              {/* === LİNK DEĞİŞTİ === */}
+              <Link to={ctaLink}>
+                <Button size="lg" className="group bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-8 py-6 text-lg shadow-xl shadow-blue-500/25 hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300 transform hover:-translate-y-1">
+                  {ctaText}
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Link to="/decks">
-                <Button size="lg" variant="outline" className="px-8 py-6 text-lg border-2 border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-800/30 backdrop-blur-sm hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-all duration-300 transform hover:-translate-y-1"> {/* Stil güncellendi */}
-                  Destelere Göz At {/* Türkçe Çeviri */}
+              
+              {/* === YENİ LİNK: /guides EKLENDİ (DAHA ÇOK İÇERİK LİNKİ) === */}
+              <Link to="/guides">
+                <Button size="lg" variant="outline" className="px-8 py-6 text-lg border-2 border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-800/30 backdrop-blur-sm hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-all duration-300 transform hover:-translate-y-1">
+                  Rehberlere Göz At
                 </Button>
               </Link>
             </div>
@@ -110,28 +119,30 @@ export const Home = () => {
               Desteni geliştirmeye hazır mısın? {/* Türkçe Çeviri */}
             </h2>
             <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-              Yapay zeka destekli analizi ile kazanma oranını artıran binlerce oyuncuya katılın. {/* Türkçe Çeviri */}
+              Yapay zeka destekli analizi ile kazanma oranını artıran binlerce oyuncuya katılın. {/* Türkçe Çiviri */}
             </p>
-            <Link to={user ? '/analyzer' : '/register'}>
+            
+            {/* === LİNK DEĞİŞTİ === */}
+            <Link to={ctaLink}>
               <Button
                 size="lg"
                 className="w-full sm:w-auto group bg-white text-blue-600 hover:bg-gray-100 px-8 py-6 text-lg shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
-              // KRİTİK DÜZELTME: whitespace-normal eklendi
               >
                 <span className="whitespace-normal text-center">
-                  {user ? 'Hemen Analiz Et' : 'Ücretsiz Denemeyi Başlat'}
+                  {ctaText}
                 </span>
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
+            
             {/* 2. ÖRNEK ANALİZ LİNKİ (AdSense İçin ZORUNLU EKLENTİ) */}
-            <Link to="/example-analysis">
+            <Link to="/guides">
               <Button
                 size="lg"
                 variant="link" // Link stili kullanarak butona benzemesini engelle
                 className="text-white hover:text-gray-200 dark:text-white dark:hover:text-gray-200"
               >
-                Örnek Analizi Gör
+                Rehberleri Oku
               </Button>
             </Link>
           </div>

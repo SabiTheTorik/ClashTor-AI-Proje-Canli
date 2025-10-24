@@ -264,92 +264,135 @@ export const Analyzer = () => {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* === BAŞLANGIÇ EKRANI (Analiz öncesi) === */}
         {!analysisData && !errorInfo && (
-          <Card className="max-w-2xl mx-auto mb-12 shadow-xl border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-2xl">
-                <Search className="h-6 w-6 text-blue-600" />
-                Deste Analizörü
-              </CardTitle>
-              <CardDescription>
-                Yapay zeka önerileri için oyuncu etiketini gir. Format: #9VPR8GVY
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleAnalyze} className="space-y-4">
-                <div className="flex gap-2">
-                  <Input
-                    type="text"
-                    placeholder="#9VPR8GVY"
-                    value={playerTag}
-                    onChange={(e) => setPlayerTag(e.target.value)}
-                    className="flex-1 text-lg py-6 px-4" // Daha büyük input
-                    disabled={loading}
-                  />
-                  <Button
-                    type="submit"
-                    disabled={loading || (user.has_used_free_analysis && !user.is_premium)} // Limiti kontrol et
-                    className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-6 py-6 text-base" // Buton boyutu
+          <> {/* <-- YENİ: Fragment ekledik */}
+            <Card className="max-w-2xl mx-auto mb-12 shadow-xl border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-2xl">
+                  <Search className="h-6 w-6 text-blue-600" />
+                  Deste Analizörü
+                </CardTitle>
+                <CardDescription>
+                  Yapay zeka önerileri için oyuncu etiketini gir. Format: #9VPR8GVY
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleAnalyze} className="space-y-4">
+                  <div className="flex gap-2">
+                    <Input
+                      type="text"
+                      placeholder="#9VPR8GVY"
+                      value={playerTag}
+                      onChange={(e) => setPlayerTag(e.target.value)}
+                      className="flex-1 text-lg py-6 px-4" // Daha büyük input
+                      disabled={loading}
+                    />
+                    <Button
+                      type="submit"
+                      disabled={loading || (user.has_used_free_analysis && !user.is_premium)} // Limiti kontrol et
+                      className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-6 py-6 text-base" // Buton boyutu
+                    >
+                      {loading ? (
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                      ) : (
+                        <span className="flex items-center gap-2">
+                          Analiz Et
+                          <ArrowRight className="h-4 w-4" />
+                        </span>
+                      )}
+                    </Button>
+                  </div>
+                  {/* --- YENİ: Analiz Modu Seçimi --- */}
+                  <RadioGroup
+                    defaultValue="most_frequent"
+                    value={analyzeMode}
+                    onValueChange={setAnalyzeMode} // Seçim değiştiğinde state'i güncelle
+                    className="flex flex-col sm:flex-row gap-4 pt-2"
+                    disabled={loading} // Yüklenirken devre dışı bırak
                   >
-                    {loading ? (
-                      <Loader2 className="h-5 w-5 animate-spin" />
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="most_frequent" id="mode-most-frequent" />
+                      <Label htmlFor="mode-most-frequent" className="cursor-pointer">En Çok Oynanan Deste</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="last" id="mode-last" />
+                      <Label htmlFor="mode-last" className="cursor-pointer">Son Maçtaki Deste</Label>
+                    </div>
+                  </RadioGroup>
+                  {/* --- YENİ SONU --- */}
+                  {/* Kullanıcı Durum Mesajı */}
+                  <div className="text-sm mt-3 flex items-center gap-2 px-1">
+                    {user.is_premium ? (
+                      <span className="text-green-600 dark:text-green-400">
+                        <i className="fa-solid fa-gem mr-1"></i> Premium Aktif: Sınırsız analiz.
+                      </span>
+                    ) : isLimitReachedToday ? (
+                      <span className="text-red-600 dark:text-red-400">
+                        <AlertCircle className="inline h-4 w-4 mr-1" /> Günlük limitiniz doldu ({currentCount}/{MAX_FREE_ANALYSIS}).
+                      </span>
                     ) : (
-                      <span className="flex items-center gap-2">
-                        Analiz Et
-                        <ArrowRight className="h-4 w-4" />
+                      <span className="text-blue-600 dark:text-blue-400">
+                        <Info className="inline h-4 w-4 mr-1" />
+                        {remainingCount} ücretsiz analiz hakkınız kaldı.
                       </span>
                     )}
-                  </Button>
-                </div>
-                {/* --- YENİ: Analiz Modu Seçimi --- */}
-                <RadioGroup
-                  defaultValue="most_frequent"
-                  value={analyzeMode}
-                  onValueChange={setAnalyzeMode} // Seçim değiştiğinde state'i güncelle
-                  className="flex flex-col sm:flex-row gap-4 pt-2"
-                  disabled={loading} // Yüklenirken devre dışı bırak
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="most_frequent" id="mode-most-frequent" />
-                    <Label htmlFor="mode-most-frequent" className="cursor-pointer">En Çok Oynanan Deste</Label>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="last" id="mode-last" />
-                    <Label htmlFor="mode-last" className="cursor-pointer">Son Maçtaki Deste</Label>
-                  </div>
-                </RadioGroup>
-                {/* --- YENİ SONU --- */}
-                {/* Kullanıcı Durum Mesajı */}
-                <div className="text-sm mt-3 flex items-center gap-2 px-1">
-                  {user.is_premium ? (
-                    <span className="text-green-600 dark:text-green-400">
-                      <i className="fa-solid fa-gem mr-1"></i> Premium Aktif: Sınırsız analiz.
-                    </span>
-                  ) : isLimitReachedToday ? (
-                    <span className="text-red-600 dark:text-red-400">
-                      <AlertCircle className="inline h-4 w-4 mr-1" /> Günlük limitiniz doldu ({currentCount}/{MAX_FREE_ANALYSIS}).
-                    </span>
-                  ) : (
-                    <span className="text-blue-600 dark:text-blue-400">
-                      <Info className="inline h-4 w-4 mr-1" />
-                      {remainingCount} ücretsiz analiz hakkınız kaldı.
-                    </span>
-                  )}
-                </div>
 
-                {/* Limit dolduysa Premium butonu (Aşağıdaki butonun koşulunu da buna göre güncelleyin) */}
-                {isLimitReachedToday && !user.is_premium && (
-                  <Button
-                    variant="outline"
-                    onClick={() => navigate('/premium')}
-                    className="w-full mt-4 border-yellow-500 text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-950/20"
-                  >
-                    <Zap className="h-4 w-4 mr-2" />
-                    Premium'a Yükselt
-                  </Button>
-                )}
-              </form>
-            </CardContent>
-          </Card>
+                  {/* Limit dolduysa Premium butonu (Aşağıdaki butonun koşulunu da buna göre güncelleyin) */}
+                  {isLimitReachedToday && !user.is_premium && (
+                    <Button
+                      variant="outline"
+                      onClick={() => navigate('/premium')}
+                      className="w-full mt-4 border-yellow-500 text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-950/20"
+                    >
+                      <Zap className="h-4 w-4 mr-2" />
+                      Premium'a Yükselt
+                    </Button>
+                  )}
+                </form>
+              </CardContent>
+            </Card>
+
+            {/* ================================================================= */}
+            {/* === YENİ ADSENSE İÇERİK BLOĞU BAŞLANGICI === */}
+            {/* ================================================================= */}
+            <Card className="max-w-4xl mx-auto my-12 shadow-lg border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-2xl">Clashtor AI Analizörü Nasıl Çalışır?</CardTitle>
+                <CardDescription>
+                  Yapay zeka modelimizin oyun tarzınızı nasıl analiz ettiğini ve size nasıl daha iyi bir oyuncu olmanız için yardımcı olduğunu keşfedin.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="prose dark:prose-invert max-w-none space-y-4">
+                <p>
+                  Clashtor AI, sadece kartlarınızı değil, aynı zamanda son maçlarınızdaki performansınızı da dikkate alan gelişmiş bir analiz aracıdır.
+                  Amacımız, "meta" destelerini kopyalamak yerine, kendi oyun tarzınıza en uygun, küçük ama etkili değişiklikler önermektir.
+                </p>
+                
+                <h3>Analiz Süreci Adım Adım</h3>
+                <ol>
+                  <li><strong>Veri Toplama:</strong> Oyuncu etiketinizi girdiğinizde, Supercell API'si üzerinden son 1v1 ladder (kupa yolu) maçlarınıza erişiriz.</li>
+                  <li><strong>Deste Tespiti:</strong> İki analiz modundan birini seçersiniz:
+                    <ul>
+                      <li><strong>En Çok Oynanan Deste:</strong> Sistemimiz, son maçlarınızda en sık kullandığınız 8 kartlık kombinasyonu otomatik olarak bulur.</li>
+                      <li><strong>Son Maçtaki Deste:</strong> Sistem, sadece oynadığınız en son ladder maçındaki desteyi dikkate alır.</li>
+                    </ul>
+                  </li>
+                  <li><strong>Zayıflık Analizi:</strong> Yapay zeka, seçilen desteyle oynadığınız maçlardaki kayıplarınızı inceler. Hangi rakip kartların size en çok sorun çıkardığını (örn: "Bu desteyle en çok 'Pekka'ya karşı kaybetmişsiniz") tespit eder.</li>
+                  <li><strong>Öneri Oluşturma:</strong> Modelimiz, destenizin mevcut sinerjisini, iksir ortalamasını ve tespit edilen zayıflığı göz önünde bulundurarak, destenizdeki TEK bir kartı değiştirmek için öneride bulunur. Amaç, destenizi tamamen bozmadan zayıflığınızı kapatmaktır.</li>
+                </ol>
+
+                <h3>Etkili Bir Analiz İçin İpuçları</h3>
+                <ul>
+                  <li><strong>En Çok Oynanan Modu:</strong> En doğru sonuç için, ana destenizle en az 5-10 maç oynamış olmanız önerilir. Bu, yapay zekanın daha sağlıklı bir zayıflık analizi yapmasını sağlar.</li>
+                  <li><strong>Son Maç Modu:</strong> Yeni bir deste denediyseniz ve o desteyle ilgili hızlı bir öneri almak istiyorsanız bu modu kullanabilirsiniz.</li>
+                  <li><strong>Kupa Seviyesi:</strong> Öneriler, oyuncunun mevcut kupa seviyesini (Trophy) dikkate alır. Düşük kupalardaki bir oyuncuya, yüksek seviye meta kartları yerine o seviyede etkili olacak kartlar önerilir.</li>
+                </ul>
+              </CardContent>
+            </Card>
+            {/* ================================================================= */}
+            {/* === YENİ ADSENSE İÇERİK BLOĞU SONU === */}
+            {/* ================================================================= */}
+          </>
         )}
 
         {/* === HATA EKRANI === */}

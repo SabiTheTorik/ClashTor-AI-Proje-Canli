@@ -34,6 +34,10 @@ export const Footer = () => {
             {/* YENİ LİNKLERİ BURAYA EKLEYİN (Adsense için ZORUNLU) */}
             <Link to="/about" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">Hakkımızda</Link>
             <Link to="/privacy" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">Gizlilik Politikası</Link>
+
+            {/* === YENİ EKLENEN LİNK === */}
+            <Link to="/guides" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">Rehberler</Link>
+            {/* === LİNK SONU === */}
           </div>
         </div>
 

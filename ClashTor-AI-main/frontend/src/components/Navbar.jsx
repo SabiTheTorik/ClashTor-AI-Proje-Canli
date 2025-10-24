@@ -34,9 +34,17 @@ export const Navbar = () => {
           </Link>
 
           <div className="hidden md:flex items-center space-x-6">
-            <Link to="/analyzer" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium flex items-center gap-1.5">
+            
+            {/* === ADSENSE ONAYI İÇİN GEÇİCİ OLARAK GİZLENDİ === */}
+            {/* <Link to="/analyzer" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium flex items-center gap-1.5">
               <Sparkles className="h-4 w-4" />
               Analizör
+            </Link>
+            */}
+            
+            <Link to="/guides" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium flex items-center gap-2">
+              <Library className="h-4 w-4" />
+              Rehberler
             </Link>
             <Link to="/decks" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 font-medium flex items-center gap-2">
               <Library className="h-4 w-4" />
@@ -65,6 +73,11 @@ export const Navbar = () => {
                     <User className="mr-2 h-4 w-4" />
                     <span>Profil</span>
                   </DropdownMenuItem>
+                  {/* Onay alana kadar Analizör'ü buradan da gizleyebiliriz */}
+                  {/* <DropdownMenuItem onClick={() => navigate('/analyzer')}>
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    <span>Analizör</span>
+                  </DropdownMenuItem> */}
                   {!user.is_premium && (
                     <DropdownMenuItem onClick={() => navigate('/premium')}>
                       <Zap className="mr-2 h-4 w-4 text-yellow-500" />
@@ -102,8 +115,16 @@ export const Navbar = () => {
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
           <div className="px-4 py-4 space-y-3">
+            
+            {/* === ADSENSE ONAYI İÇİN GEÇİCİ OLARAK GİZLENDİ === */}
+            {/*
             <Link to="/analyzer" className="block py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400" onClick={() => setMobileMenuOpen(false)}>
               Analizör
+            </Link>
+            */}
+            
+            <Link to="/guides" className="block py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400" onClick={() => setMobileMenuOpen(false)}>
+              Rehberler
             </Link>
             <Link to="/decks" className="block py-2 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400" onClick={() => setMobileMenuOpen(false)}>
               Desteler
