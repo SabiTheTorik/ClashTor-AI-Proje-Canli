@@ -270,11 +270,11 @@ export const Profile = () => {
     // 3. === SİTEDE GÖRDÜĞÜN LİNKE GÖRE PARAMETRELER ===
     const slotsString = '0;0;0;0;0;0;0;0'; // 8 slot
     const staticL = 'Royals';
-    const staticTT = '159000002'; // Sitede gördüğün varsayılan token
+    const staticTT = '159000000'; // Sitede gördüğün varsayılan token
 
     // 4. === NİHAİ LİNK FORMATI ===
     // /en/ yolunu ve l, slots, tt parametrelerini kullanıyoruz.
-    const deckLink = `https://link.clashroyale.com/en/?clashroyale://copyDeck?deck=${cardIdString}&l=${staticL}&slots=${slotsString}&tt=${staticTT}`;
+    const deckLink = `https://link.clashroyale.com/tr/?clashroyale://copyDeck?deck=${cardIdString}&l=${staticL}&slots=${slotsString}&tt=${staticTT}`;
 
 
     // 5. === CİHAZ KONTROLÜ (Aynı kaldı) ===
