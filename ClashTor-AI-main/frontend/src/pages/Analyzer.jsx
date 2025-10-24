@@ -7,7 +7,8 @@ import { Input } from '../components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Separator } from '../components/ui/separator';
-import { Search, ArrowRight, Crown, TrendingUp, AlertCircle, Sparkles, ArrowDownUp, Save, Zap, Loader2, Info, Check } from 'lucide-react'; // Loader2 ve Info ikonlarını ekledik
+// YENİ: Copy ikonunu ekle
+import { Search, ArrowRight, Crown, TrendingUp, AlertCircle, Sparkles, ArrowDownUp, Save, Zap, Loader2, Info, Check, Copy } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
 import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group';
 import { Label } from '../components/ui/label';
@@ -31,6 +32,8 @@ export const Analyzer = () => {
   const [isSaving, setIsSaving] = useState(false); // YENİ: Kaydetme işlemi sırasındaki yüklenme durumu
   const [isSaved, setIsSaved] = useState(false);
   const [analyzeMode, setAnalyzeMode] = useState('most_frequent');
+  // YENİ: Kopyalama durumu için state
+  const [copiedDeckId, setCopiedDeckId] = useState(null);
 
   // AuthContext yüklenirken veya kullanıcı yoksa bekle veya yönlendir
   // Analyzer.jsx içinde
@@ -76,6 +79,7 @@ export const Analyzer = () => {
     setErrorInfo(null); // Önceki hatayı temizle
     setAnalysisData(null); // Önceki sonucu temizle
     setIsSaved(false); // Yeni analizde kaydetme durumunu sıfırla
+    setCopiedDeckId(null); // YENİ: Kopyalama durumunu sıfırla
 
     if (!user) { // Teorik olarak useEffect yönlendirir ama ekstra kontrol
       navigate('/login');
@@ -171,6 +175,78 @@ export const Analyzer = () => {
       setIsSaving(false); // Kaydetme işlemini bitir (başarılı veya başarısız)
     }
   };
+  
+  // =================================================================
+  // === YENİ: isMobile (Analyzer.jsx) ===
+  // =================================================================
+  const isMobile = () => {
+    // Mobil cihaz tespiti için basit bir regex
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  };
+  
+  // =================================================================
+  // === YENİ: handleCopyDeck (Analyzer.jsx) ===
+  // =================================================================
+  const handleCopyDeck = async () => {
+      if (!analysisData) return;
+
+      const { deck_cards, card_swap_info, added_card_details } = analysisData;
+
+      // 1. Deste var mı kontrol et
+      if (!deck_cards || !card_swap_info || !added_card_details) {
+        toast({ title: "Hata", description: "Deste bilgisi eksik.", variant: "destructive" });
+        return;
+      }
+      
+      // 2. Önerilen desteyi oluştur
+      // 'deck_cards' orijinal destedir (tam objeler)
+      // 'card_swap_info.remove' çıkarılacak kartın adıdır
+      // 'added_card_details' eklenecek kartın tam objesidir
+      const modified_deck = deck_cards.filter(card => card.name !== card_swap_info.remove);
+      modified_deck.push(added_card_details);
+
+      // 3. Kart ID'lerini al
+      let cardIds = [];
+      for (const card of modified_deck) {
+        if (!card.id) {
+          toast({ title: "Kopyalanamadı", description: `Kart ID bilgisi eksik: ${card.name}`, variant: "destructive" });
+          return;
+        }
+        cardIds.push(card.id);
+      }
+      const cardIdString = cardIds.join(';');
+
+      // 4. Linki oluştur
+      const slotsString = '0;0;0;0;0;0;0;0';
+      const staticL = 'Royals';
+      const staticTT = '159000000';
+      const deckLink = `https://link.clashroyale.com/tr/?clashroyale://copyDeck?deck=${cardIdString}&l=${staticL}&slots=${slotsString}&tt=${staticTT}`;
+
+      // 5. Cihaz kontrolü
+      if (isMobile()) {
+        toast({
+          title: "Clash Royale Açılıyor...",
+          description: "Önerilen deste oyuna aktarılıyor."
+        });
+        window.location.href = deckLink;
+      } else {
+        try {
+          await navigator.clipboard.writeText(deckLink);
+          toast({
+            title: "Önerilen Deste Linki Kopyalandı!",
+            description: "Masaüstünde olduğunuz için link panonuza kopyalandı."
+          });
+          setCopiedDeckId('analyzer_copy'); // Benzersiz bir ID kullan
+          setTimeout(() => setCopiedDeckId(null), 2000);
+        } catch (err) {
+          toast({ title: "Kopyalanamadı", description: "Panoya yazma izni alınamadı.", variant: "destructive" });
+        }
+      }
+    };
+  // =================================================================
+  // === YENİ FONKSİYON SONU ===
+  // =================================================================
+
 
   // AuthContext hala yükleniyorsa veya kullanıcı yoksa boş içerik göster
   if (authLoading || !user) {
@@ -494,9 +570,13 @@ export const Analyzer = () => {
                     dangerouslySetInnerHTML={{ __html: analysisData.analysis_result_html.replace(/DEĞİŞİM:.*$/gm, '') }}
                   />
 
-                  {/* Kaydetme Butonu */}
+                  {/* ================================================================= */}
+                  {/* === YENİ: Kaydetme ve Kopyalama Buton Alanı === */}
+                  {/* ================================================================= */}
                   {analysisData.card_swap_info && analysisData.card_swap_info.remove && (
                     <div className="mt-6 flex flex-wrap gap-3">
+                      
+                      {/* Kaydetme Butonu (Mevcut) */}
                       <Button
                         id="save-analysis-btn-id" /* ID ekledik (opsiyonel) */
                         onClick={handleSaveAnalysis}
@@ -515,6 +595,24 @@ export const Analyzer = () => {
                         )}
                         {isSaving ? 'Kaydediliyor...' : isSaved ? 'Kaydedildi' : 'Analizi Kaydet'}
                       </Button>
+
+                      {/* === YENİ DESTE KOPYALA BUTONU === */}
+                      <Button
+                        onClick={handleCopyDeck}
+                        disabled={isSaving} // Kaydederken basılmasın
+                        variant="outline"
+                        className="flex items-center gap-2"
+                      >
+                        {copiedDeckId === 'analyzer_copy' ? (
+                          <Check className="h-4 w-4" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                        {copiedDeckId === 'analyzer_copy' ? 'Kopyalandı!' : 'Önerilen Desteyi Kopyala'}
+                      </Button>
+                      {/* === BUTON SONU === */}
+
+                      {/* Premium Butonu (Mevcut) */}
                       {!user?.is_premium && (
                         <Button variant="outline" onClick={() => navigate('/premium')} className="flex items-center gap-2 border-yellow-500 text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-950/20">
                           <Zap className="h-4 w-4" />
@@ -523,6 +621,9 @@ export const Analyzer = () => {
                       )}
                     </div>
                   )}
+                  {/* ================================================================= */}
+                  {/* === GÜNCELLEME SONU === */}
+                  {/* ================================================================= */}
                 </CardContent>
               </Card>
             )}

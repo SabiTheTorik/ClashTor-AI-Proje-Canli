@@ -244,45 +244,60 @@ export const Profile = () => {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   };
 
-  // Profile.jsx ve Decks.jsx dosyalarındaki
-  // MEVCUT handleCopyDeck fonksiyonunu AŞAĞIDAKİ İLE DEĞİŞTİR:
-  // ('isMobile' fonksiyonu aynı kalabilir)
+  // =================================================================
+  // === GÜNCELLENDİ: handleCopyDeck (Profile.jsx) ===
+  // =================================================================
+  const handleCopyDeck = async (analysis, analysisId) => {
+    const { original_deck, card_to_remove, card_to_add } = analysis;
 
-  const handleCopyDeck = async (deck, analysisId) => {
     // 1. Deste var mı kontrol et
-    if (!deck || deck.length === 0) {
-      toast({ title: "Hata", description: "Destede kart bulunamadı.", variant: "destructive" });
+    if (!original_deck || original_deck.length === 0 || !card_to_remove || !card_to_add) {
+      toast({ title: "Hata", description: "Analiz bilgisi eksik, deste kopyalanamadı.", variant: "destructive" });
       return;
     }
+    
+    // 2. Önerilen kartı 'allCards' içinden bul
+    if (!allCards) {
+      toast({ title: "Hata", description: "Kart verisi yüklenemedi, lütfen bekleyin.", variant: "destructive" });
+      return;
+    }
+    const newCardObject = allCards[card_to_add];
+    
+    if (!newCardObject || !newCardObject.id) {
+        toast({ title: "Kopyalanamadı", description: `Önerilen kart (${card_to_add}) bilgisi bulunamadı.`, variant: "destructive" });
+        return;
+    }
 
-    // 2. Kart ID'lerini al
+    // 3. Önerilen desteyi oluştur
+    const modified_deck = original_deck.filter(card => card.name !== card_to_remove);
+    modified_deck.push(newCardObject); // Bulduğumuz tam kart objesini ekle
+
+    // 4. Kart ID'lerini al
     let cardIds = [];
-    for (const card of deck) {
+    for (const card of modified_deck) {
       if (!card.id) {
-        // Player tag'a ihtiyacımız kalmadığı için bu eski kayıtlar da çalışacak!
-        toast({ title: "Kopyalanamadı", description: "Bu destenin (eski veri) kart ID bilgisi eksik.", variant: "destructive" });
+        toast({ title: "Kopyalanamadı", description: `Destedeki bir kartın ID'si eksik: ${card.name || 'Bilinmiyor'}`, variant: "destructive" });
         return;
       }
       cardIds.push(card.id);
     }
     const cardIdString = cardIds.join(';');
 
-    // 3. === SİTEDE GÖRDÜĞÜN LİNKE GÖRE PARAMETRELER ===
+    // 5. === SİTEDE GÖRDÜĞÜN LİNKE GÖRE PARAMETRELER ===
     const slotsString = '0;0;0;0;0;0;0;0'; // 8 slot
     const staticL = 'Royals';
     const staticTT = '159000000'; // Sitede gördüğün varsayılan token
 
-    // 4. === NİHAİ LİNK FORMATI ===
-    // /en/ yolunu ve l, slots, tt parametrelerini kullanıyoruz.
+    // 6. === NİHAİ LİNK FORMATI ===
     const deckLink = `https://link.clashroyale.com/tr/?clashroyale://copyDeck?deck=${cardIdString}&l=${staticL}&slots=${slotsString}&tt=${staticTT}`;
 
 
-    // 5. === CİHAZ KONTROLÜ (Aynı kaldı) ===
+    // 7. === CİHAZ KONTROLÜ ===
     if (isMobile()) {
       // --- MOBİL CİHAZ ---
       toast({
         title: "Clash Royale Açılıyor...",
-        description: "Deste oyuna aktarılıyor."
+        description: "Önerilen deste oyuna aktarılıyor."
       });
       window.location.href = deckLink;
 
@@ -291,7 +306,7 @@ export const Profile = () => {
       try {
         await navigator.clipboard.writeText(deckLink);
         toast({
-          title: "Deste Linki Kopyalandı!",
+          title: "Önerilen Deste Linki Kopyalandı!",
           description: "Masaüstünde olduğunuz için link panonuza kopyalandı."
         });
         setCopiedDeckId(analysisId);
@@ -301,6 +316,10 @@ export const Profile = () => {
       }
     }
   };
+  // =================================================================
+  // === GÜNCELLEME SONU ===
+  // =================================================================
+
 
   // --- Render ---
 
@@ -532,11 +551,12 @@ export const Profile = () => {
                           {analysis.is_shared ? 'Paylaşımı Kaldır' : 'Paylaş'}
                         </Button>
 
-                        {/* === YENİ KOPYALA BUTONU === */}
+                        {/* === GÜNCELLENDİ: KOPYALA BUTONU === */}
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleCopyDeck(analysis.original_deck, analysis.id)}
+                          // onClick'i tüm 'analysis' objesini alacak şekilde değiştir
+                          onClick={() => handleCopyDeck(analysis, analysis.id)}
                           className="flex-1 text-xs"
                         >
                           {copiedDeckId === analysis.id ? (
@@ -547,11 +567,12 @@ export const Profile = () => {
                           ) : (
                             <>
                               <Copy className="h-3.5 w-3.5 mr-1" />
-                              Kopyala
+                              Öneriyi Kopyala
                             </>
                           )}
                         </Button>
-                        {/* === BUTON SONU === */}
+                        {/* === GÜNCELLEME SONU === */}
+                        
                         {/* === SİLME BUTONU GÜNCELLEMESİ === */}
                         <AlertDialog open={isDeleteDialogOpen && analysisToDelete === analysis.id} onOpenChange={(open) => { if (!open) setAnalysisToDelete(null); setIsDeleteDialogOpen(open); }}>
                           <AlertDialogTrigger asChild>
